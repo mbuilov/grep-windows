@@ -1,0 +1,45 @@
+diff -Naur grep-3.3-t1/lib/fts.c grep-3.3/lib/fts.c
+--- grep-3.3-t1/lib/fts.c	2018-12-21 05:51:47.000000000 +0300
++++ grep-3.3/lib/fts.c	2018-12-24 12:40:33.473025900 +0300
+@@ -120,6 +120,9 @@
+ #ifndef S_IFSOCK
+ # define S_IFSOCK 0
+ #endif
++#ifndef S_IFBLK
++# define S_IFBLK 0
++#endif
+ 
+ enum
+ {
+@@ -1874,7 +1877,7 @@
+         FTSENT *dummy;
+         int (*compare) (void const *, void const *) =
+           ((sizeof &dummy == sizeof (void *)
+-            && (long int) &dummy == (long int) (void *) &dummy)
++            && (long long int) &dummy == (long long int) (void *) &dummy)
+            ? (int (*) (void const *, void const *)) sp->fts_compar
+            : fts_compar);
+ 
+diff -Naur grep-3.3-t1/src/grep.c grep-3.3/src/grep.c
+--- grep-3.3-t1/src/grep.c	2018-12-21 06:31:11.000000000 +0300
++++ grep-3.3/src/grep.c	2018-12-24 12:59:27.698614000 +0300
+@@ -52,6 +52,10 @@
+ #include "xbinary-io.h"
+ #include "xstrtol.h"
+ 
++#if defined _WIN32 && ! defined __CYGWIN__
++#define strcasecmp(s1,s2) _stricmp(s1,s2)
++#endif
++
+ enum { SEP_CHAR_SELECTED = ':' };
+ enum { SEP_CHAR_REJECTED = '-' };
+ static char const SEP_STR_GROUP[] = "--";
+@@ -2769,6 +2773,8 @@
+                    (char *) NULL);
+       puts (_("Written by Mike Haertel and others; see\n"
+               "<https://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>."));
++      puts (_("Patched by: Michael M. Builov <mbuilov@gmail.com>.\n"));
++
+       return EXIT_SUCCESS;
+     }
+ 

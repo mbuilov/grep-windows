@@ -5,8 +5,10 @@ All patches under the same license as sources of [Gnu Grep](https://www.gnu.org/
 
 Author of the patches: Michael M. Builov (mbuilov@gmail.com)
 
-## Fixed bugs:
-- Warning: build is not tested yet!
+## Known bugs of this build:
+- support for Perl regular expressions is not compiled in
+- search in sub-directories is not working (grep -r produces "warning: xxx: recursive directory loop")
+- output is colorized via ANSI escape sequences, but standard Windows console (at least on Win7) does not understand them
 
 ## Pre-built executables:
 - [`grep-3.3-x64.exe`](/grep-3.3-x64.exe) - grep 3.3 built for windows7 x64

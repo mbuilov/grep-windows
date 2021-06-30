@@ -1,0 +1,249 @@
+diff -Naur grep-3.6/lib/ctype.h grep-3.6-3/lib/ctype.h
+--- grep-3.6/lib/ctype.h	2021-06-30 18:40:38.566791200 +0300
++++ grep-3.6-3/lib/ctype.h	2021-06-30 17:42:17.274854200 +0300
+@@ -32,7 +32,7 @@
+ 
+ /* Include the original <ctype.h>.  */
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\ctype.h"
+ 
+ #ifndef _GL_CTYPE_H
+ #define _GL_CTYPE_H
+diff -Naur grep-3.6/lib/errno.h grep-3.6-3/lib/errno.h
+--- grep-3.6/lib/errno.h	2021-06-30 18:40:39.469665900 +0300
++++ grep-3.6-3/lib/errno.h	2021-06-30 17:42:35.253822900 +0300
+@@ -24,7 +24,7 @@
+ 
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\errno.h"
+ 
+ #ifndef _GL_ERRNO_H
+ #define _GL_ERRNO_H
+diff -Naur grep-3.6/lib/fcntl.h grep-3.6-3/lib/fcntl.h
+--- grep-3.6/lib/fcntl.h	2021-06-30 18:40:39.848748300 +0300
++++ grep-3.6-3/lib/fcntl.h	2021-06-30 17:42:55.903979900 +0300
+@@ -38,7 +38,7 @@
+ #if !(defined __GLIBC__ || defined __UCLIBC__) || (defined __cplusplus && defined GNULIB_NAMESPACE && (defined __ICC || !(__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))))
+ # include <sys/stat.h>
+ #endif
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\fcntl.h"
+ 
+ /* Native Windows platforms declare open(), creat() in <io.h>.  */
+ #if (0 || 1 || defined GNULIB_POSIXCHECK) \
+@@ -64,7 +64,7 @@
+ # include <sys/stat.h>
+ #endif
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\fcntl.h"
+ 
+ /* Native Windows platforms declare open(), creat() in <io.h>.  */
+ #if (0 || 1 || defined GNULIB_POSIXCHECK) \
+diff -Naur grep-3.6/lib/inttypes.h grep-3.6-3/lib/inttypes.h
+--- grep-3.6/lib/inttypes.h	2021-06-30 18:40:41.137069000 +0300
++++ grep-3.6-3/lib/inttypes.h	2021-06-30 17:53:19.688332100 +0300
+@@ -38,7 +38,7 @@
+ #   define __STDC_FORMAT_MACROS 1
+ #  endif
+ 
+-#  include ""
++#  include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\inttypes.h"
+ 
+ #  define _GL_FINISHED_INCLUDING_SYSTEM_INTTYPES_H
+ # endif
+diff -Naur grep-3.6/lib/limits.h grep-3.6-3/lib/limits.h
+--- grep-3.6/lib/limits.h	2021-06-30 18:40:41.654230000 +0300
++++ grep-3.6-3/lib/limits.h	2021-06-30 17:53:44.460184300 +0300
+@@ -38,7 +38,7 @@
+ # define _GL_ALREADY_INCLUDING_LIMITS_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-# include ""
++# include "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\include\limits.h"
+ 
+ # undef _GL_ALREADY_INCLUDING_LIMITS_H
+ 
+diff -Naur grep-3.6/lib/locale.h grep-3.6-3/lib/locale.h
+--- grep-3.6/lib/locale.h	2021-06-30 18:40:42.362942200 +0300
++++ grep-3.6-3/lib/locale.h	2021-06-30 17:54:26.561627200 +0300
+@@ -38,7 +38,7 @@
+ #define _GL_ALREADY_INCLUDING_LOCALE_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\locale.h"
+ 
+ #undef _GL_ALREADY_INCLUDING_LOCALE_H
+ 
+diff -Naur grep-3.6/lib/signal.h grep-3.6-3/lib/signal.h
+--- grep-3.6/lib/signal.h	2021-06-30 18:40:42.795425800 +0300
++++ grep-3.6-3/lib/signal.h	2021-06-30 17:58:04.360409700 +0300
+@@ -49,7 +49,7 @@
+ #include <sys/types.h>
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\signal.h"
+ 
+ #undef _GL_ALREADY_INCLUDING_SIGNAL_H
+ 
+diff -Naur grep-3.6/lib/stddef.h grep-3.6-3/lib/stddef.h
+--- grep-3.6/lib/stddef.h	2021-06-30 18:40:43.312526500 +0300
++++ grep-3.6-3/lib/stddef.h	2021-06-30 17:54:41.359903800 +0300
+@@ -52,7 +52,7 @@
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+ 
+-#  include ""
++#  include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\stddef.h"
+ 
+ /* On NetBSD 5.0, the definition of NULL lacks proper parentheses.  */
+ #  if (0 \
+diff -Naur grep-3.6/lib/stdint.h grep-3.6-3/lib/stdint.h
+--- grep-3.6/lib/stdint.h	2021-06-30 18:40:43.814042200 +0300
++++ grep-3.6-3/lib/stdint.h	2021-06-30 17:54:51.047193400 +0300
+@@ -74,7 +74,7 @@
+      in <inttypes.h> would reinclude us, skipping our contents because
+      _GL_STDINT_H is defined.
+      The include_next requires a split double-inclusion guard.  */
+-# include ""
++# include "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\include\stdint.h"
+ #endif
+ 
+ #if ! defined _GL_STDINT_H && ! defined _GL_JUST_INCLUDE_SYSTEM_STDINT_H
+diff -Naur grep-3.6/lib/stdio.h grep-3.6-3/lib/stdio.h
+--- grep-3.6/lib/stdio.h	2021-06-30 18:40:45.118020400 +0300
++++ grep-3.6-3/lib/stdio.h	2021-06-30 17:55:11.295377400 +0300
+@@ -30,7 +30,7 @@
+      In this situation, the functions are not yet declared, therefore we cannot
+      provide the C++ aliases.  */
+ 
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\stdio.h"
+ 
+ #else
+ /* Normal invocation convention.  */
+@@ -40,7 +40,7 @@
+ #define _GL_ALREADY_INCLUDING_STDIO_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\stdio.h"
+ 
+ #undef _GL_ALREADY_INCLUDING_STDIO_H
+ 
+diff -Naur grep-3.6/lib/stdlib.h grep-3.6-3/lib/stdlib.h
+--- grep-3.6/lib/stdlib.h	2021-06-30 18:40:46.321695400 +0300
++++ grep-3.6-3/lib/stdlib.h	2021-06-30 17:55:34.847370600 +0300
+@@ -25,7 +25,7 @@
+ /* Special invocation conventions inside some gnulib header files,
+    and inside some glibc header files, respectively.  */
+ 
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\stdlib.h"
+ 
+ #else
+ /* Normal invocation convention.  */
+@@ -33,7 +33,7 @@
+ #ifndef _GL_STDLIB_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\stdlib.h"
+ 
+ #ifndef _GL_STDLIB_H
+ #define _GL_STDLIB_H
+diff -Naur grep-3.6/lib/string.h grep-3.6-3/lib/string.h
+--- grep-3.6/lib/string.h	2021-06-30 18:40:46.823353300 +0300
++++ grep-3.6-3/lib/string.h	2021-06-30 17:55:48.346601400 +0300
+@@ -38,7 +38,7 @@
+ #define _GL_ALREADY_INCLUDING_STRING_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\string.h"
+ 
+ #undef _GL_ALREADY_INCLUDING_STRING_H
+ 
+diff -Naur grep-3.6/lib/sys/stat.h grep-3.6-3/lib/sys/stat.h
+--- grep-3.6/lib/sys/stat.h	2021-06-30 18:40:47.895575200 +0300
++++ grep-3.6-3/lib/sys/stat.h	2021-06-30 17:57:43.514441500 +0300
+@@ -29,7 +29,7 @@
+ #if defined __need_system_sys_stat_h
+ /* Special invocation convention.  */
+ 
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\sys\stat.h"
+ 
+ #else
+ /* Normal invocation convention.  */
+@@ -44,7 +44,7 @@
+ #include <time.h>
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\sys\stat.h"
+ 
+ #ifndef _GL_SYS_STAT_H
+ #define _GL_SYS_STAT_H
+diff -Naur grep-3.6/lib/sys/types.h grep-3.6-3/lib/sys/types.h
+--- grep-3.6/lib/sys/types.h	2021-06-30 18:40:48.196470800 +0300
++++ grep-3.6-3/lib/sys/types.h	2021-06-30 17:57:19.104768200 +0300
+@@ -36,7 +36,7 @@
+ 
+ /* The include_next requires a split double-inclusion guard.  */
+ # define _GL_INCLUDING_SYS_TYPES_H
+-#include ""
++#include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\sys\types.h"
+ # undef _GL_INCLUDING_SYS_TYPES_H
+ 
+ #ifndef _GL_SYS_TYPES_H
+diff -Naur grep-3.6/lib/time.h grep-3.6-3/lib/time.h
+--- grep-3.6/lib/time.h	2021-06-30 18:40:49.030332500 +0300
++++ grep-3.6-3/lib/time.h	2021-06-30 17:56:06.432227300 +0300
+@@ -32,7 +32,7 @@
+       && !defined __MINGW32__)                         \
+      || defined _GL_TIME_H)
+ 
+-# include ""
++# include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\time.h"
+ 
+ #else
+ 
+@@ -44,7 +44,7 @@
+ #  include <unistd.h>
+ # endif
+ 
+-# include ""
++# include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\time.h"
+ 
+ /* NetBSD 5.0 mis-defines NULL.  */
+ # include <stddef.h>
+diff -Naur grep-3.6/lib/wchar.h grep-3.6-3/lib/wchar.h
+--- grep-3.6/lib/wchar.h	2021-06-30 18:40:53.143267900 +0300
++++ grep-3.6-3/lib/wchar.h	2021-06-30 17:56:32.289845000 +0300
+@@ -85,7 +85,7 @@
+    Some builds of uClibc lack it.  */
+ /* The include_next requires a split double-inclusion guard.  */
+ #if 1
+-# include ""
++# include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\wchar.h"
+ #endif
+ 
+ #undef _GL_ALREADY_INCLUDING_WCHAR_H
+diff -Naur grep-3.6/lib/wctype.h grep-3.6-3/lib/wctype.h
+--- grep-3.6/lib/wctype.h	2021-06-30 18:40:53.444198100 +0300
++++ grep-3.6-3/lib/wctype.h	2021-06-30 17:56:48.159662700 +0300
+@@ -70,7 +70,7 @@
+    BeOS 5 has the functions but no <wctype.h>.  */
+ /* The include_next requires a split double-inclusion guard.  */
+ #if 1
+-# include ""
++# include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\wctype.h"
+ #endif
+ 
+ #ifndef _GL_WCTYPE_H

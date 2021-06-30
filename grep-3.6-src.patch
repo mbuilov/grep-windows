@@ -1,0 +1,32 @@
+diff -Naur grep-3.6/lib/fts.c grep-3.6-3/lib/fts.c
+--- grep-3.6/lib/fts.c	2020-08-23 12:36:33.000000000 +0300
++++ grep-3.6-3/lib/fts.c	2021-06-30 17:52:35.486185800 +0300
+@@ -121,6 +121,9 @@
+ #ifndef S_IFSOCK
+ # define S_IFSOCK 0
+ #endif
++#ifndef S_IFBLK
++# define S_IFBLK 0
++#endif
+ 
+ enum
+ {
+@@ -1835,7 +1838,7 @@
+         FTSENT *dummy;
+         int (*compare) (void const *, void const *) =
+           ((sizeof &dummy == sizeof (void *)
+-            && (long int) &dummy == (long int) (void *) &dummy)
++            && (long long int) &dummy == (long long int) (void *) &dummy)
+            ? (int (*) (void const *, void const *)) sp->fts_compar
+            : fts_compar);
+ 
+--- grep-3.6-3/src/grep.c	2020-11-03 23:37:02.000000000 +0300
++++ grep-3.6/src/grep.c	2021-06-30 19:15:55.115925300 +0300
+@@ -2831,6 +2831,7 @@
+                    (char *) NULL);
+       puts (_("Written by Mike Haertel and others; see\n"
+               "<https://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>."));
++      puts (_("Patched by: Michael M. Builov <mbuilov@gmail.com>.\n"));
+       return EXIT_SUCCESS;
+     }
+ 

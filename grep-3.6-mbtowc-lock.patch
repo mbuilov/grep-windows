@@ -1,0 +1,23 @@
+diff -Naur grep-3.6/lib/mbtowc-lock.h grep-3.6-3/lib/mbtowc-lock.h
+--- grep-3.6/lib/mbtowc-lock.h	2020-08-23 12:36:33.000000000 +0300
++++ grep-3.6-3/lib/mbtowc-lock.h	2021-06-30 18:09:59.893281700 +0300
+@@ -34,7 +34,7 @@
+ 
+ #if defined _WIN32 && !defined __CYGWIN__
+ 
+-extern __declspec(dllimport) CRITICAL_SECTION *gl_get_mbtowc_lock (void);
++extern /*__declspec(dllimport)*/ CRITICAL_SECTION *gl_get_mbtowc_lock (void);
+ 
+ static int
+ mbtowc_with_lock (wchar_t *pwc, const char *p, size_t m)
+--- grep-3.6-3/lib/mbtowc-lock.c	2020-08-23 12:36:33.000000000 +0300
++++ grep-3.6/lib/mbtowc-lock.c	2021-06-30 19:41:50.612081700 +0300
+@@ -59,7 +59,7 @@
+    because the latter is not guaranteed to be a stable ABI in the future.  */
+ 
+ /* Make sure the function gets exported from DLLs.  */
+-DLL_EXPORTED CRITICAL_SECTION *gl_get_mbtowc_lock (void);
++/*DLL_EXPORTED*/ CRITICAL_SECTION *gl_get_mbtowc_lock (void);
+ 
+ static glwthread_initguard_t guard = GLWTHREAD_INITGUARD_INIT;
+ static CRITICAL_SECTION lock;

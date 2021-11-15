@@ -13,12 +13,12 @@ Author of the patches: Michael M. Builov (mbuilov@gmail.com)
 - fixed support for colorizing output of grep in Windows console (enabled via '--color' option; tip: use "color" command to reset console colors)
 
 ## Pre-built executables:
-- [`grep-3.6-x64.exe`](/grep-3.6-x64.exe) - grep 3.6 built for Windows10 x64
+- [`grep-3.7-x64.exe`](/grep-3.7-x64.exe) - grep 3.7 built for Windows10 x64
 
 ## Instructions how to create build patch
-- [`grep-3.6-build-patch-howto.txt`](/grep-3.6-build-patch-howto.txt)
+- [`grep-3.7-build-patch-howto.txt`](/grep-3.7-build-patch-howto.txt)
 
 ## Prepared build patches
-For x64/Windows10/VS19:
-- [`grep-3.6-build-VS19-x64.txt`](/grep-3.6-build-VS19-x64.txt) - instructions how to apply the patch to compile grep using native tools only
-- [`grep-3.6-build-VS19-x64.patch`](/grep-3.6-build-VS19-x64.patch)
+For x64/Windows10/VS22:
+- [`grep-3.7-build-VS22-x64.txt`](/grep-3.7-build-VS22-x64.txt) - instructions how to apply the patch to compile grep using native tools only
+- [`grep-3.7-build-VS22-x64.patch`](/grep-3.7-build-VS22-x64.patch)

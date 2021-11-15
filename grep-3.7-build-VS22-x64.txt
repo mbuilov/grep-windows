@@ -1,0 +1,18 @@
+How to build native win64 grep.exe with Visual Studio 2022 and WDK10
+
+From cygwin or other unix shell:
+
+1) get grep archive:    wget https://ftp.gnu.org/gnu/grep/grep-3.7.tar.xz
+2) unpack sed archive:  tar xf grep-3.7.tar.xz
+3) go to sed sources:   cd grep-3.7
+
+4) fix grep-3.7-build-VS22-x64.patch - change paths to locations of Visual Studio 2019 and WDK10
+
+sed -i '/Visual Studio/s@.:.*include@C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.30.30705\\include@' grep-3.7-build-VS22-x64.patch
+sed -i '/Windows Kits/s@.:.*ucrt@C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\ucrt@' grep-3.7-build-VS22-x64.patch
+
+5) patch grep:          patch -Np1 -i grep-3.7-build-VS22-x64.patch
+6) run dos prompt:      cmd.exe /c "start cmd.exe"
+7) setup compiler:      "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+8) do compile:          make.bat
+9) check build result:  grep.exe --version

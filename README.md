@@ -14,6 +14,7 @@ Author of the patches: Michael M. Builov (mbuilov@gmail.com)
 
 ## Pre-built executables:
 - [`grep-3.7-x64.exe`](/grep-3.7-x64.exe) - grep 3.7 built for Windows10 x64
+- [`grep-3.7-x86.exe`](/grep-3.7-x86.exe) - grep 3.7 built for WindowsXP x86
 
 ## Instructions how to create build patch
 - [`grep-3.7-build-patch-howto.txt`](/grep-3.7-build-patch-howto.txt)
@@ -22,3 +23,6 @@ Author of the patches: Michael M. Builov (mbuilov@gmail.com)
 For x64/Windows10/VS22:
 - [`grep-3.7-build-VS22-x64.txt`](/grep-3.7-build-VS22-x64.txt) - instructions how to apply the patch to compile grep using native tools only
 - [`grep-3.7-build-VS22-x64.patch`](/grep-3.7-build-VS22-x64.patch)
+For x86/WindowsXP/VS9:
+- [`grep-3.7-build-VS9-x86.txt`](/grep-3.7-build-VS9-x86.txt) - instructions how to apply the patch to compile grep using native tools only
+- [`grep-3.7-build-VS9-x86.patch`](/grep-3.7-build-VS9-x86.patch)

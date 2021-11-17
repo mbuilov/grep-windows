@@ -4,7 +4,7 @@ While building, it is possible to save build log and create a patch - for compil
 
 This is how grep-3.7-build-VS22-x64.patch was created.
 
-;(grep-3.7-build-VS9-x86.patch was created analogously in Microsoft Visual Studio 2008 environment)
+(grep-3.7-build-VS9-x86.patch was created analogously in Microsoft Visual Studio 2008 environment)
 
 
 From CYGWIN shell:
@@ -22,9 +22,9 @@ From CYGWIN shell:
   patch -Np1 -i grep-3.6-src.patch
   (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.6-src.patch)
 
-;5) to build with old non-c99 compiler (such as Microsoft Visual Studio 2008) apply one more patch:
-;  patch -Np1 -i grep-3.7-src-non-c99.patch
-;  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.7-src-non-c99.patch)
+5) to build with old non-c99 compiler (such as Microsoft Visual Studio 2008) apply one more patch:
+  patch -Np1 -i grep-3.7-src-non-c99.patch
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.7-src-non-c99.patch)
 
 6) now start dos prompt:
   cmd.exe /c "start cmd.exe"
@@ -33,8 +33,8 @@ From CYGWIN shell:
   "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
   (if Microsoft Build Tools for Visual Studio 2022 is installed in "C:\Program Files (x86)")
 
-;  --tip: for Visual Studio 2008:
-;  "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86
+  --tip: for Visual Studio 2008:
+  "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86
 
 8) run bash from dos prompt (with environment prepared for compiling with Microsoft Build Tools for Visual Studio 2022):
   bash
@@ -45,26 +45,32 @@ From CYGWIN shell:
 10) configure grep:
   CFLAGS= CC=cl CPP="cl -E" LD=lib ARFLAGS="/OUT:" ./configure --enable-threads=windows --disable-dependency-tracking --disable-silent-rules --disable-nls gl_cv_sys_struct_lconv_ok=yes
 
+  --tip: for Visual Studio 2008:
+  CFLAGS= CC="cl -D_WIN32_WINNT=0x501" CPP="cl -D_WIN32_WINNT=0x501 -E" LD=lib ARFLAGS="/OUT:" ./configure --enable-threads=windows --disable-dependency-tracking --disable-silent-rules --disable-nls gl_cv_sys_struct_lconv_ok=yes
+
 11) configure script is not fully functional to create correct Makefiles - they are need to be fixed manually:
-  sed -i 's/^SUBDIRS = .*/SUBDIRS = lib src/'                                           ./Makefile
-  sed -i 's/^RECURSIVE_TARGETS = /&gen /'                                               ./Makefile
-  sed -i 's/-c -o /-c -nologo -Fo/'                                                     ./lib/Makefile ./src/Makefile
-  sed -i 's@^AR = .*@AR = lib /nologo@'                                                 ./lib/Makefile
+  sed -i 's/^SUBDIRS = .*/SUBDIRS = lib src/'                                          ./Makefile
+  sed -i 's/^RECURSIVE_TARGETS = /&gen /'                                              ./Makefile
+  sed -i 's/-c -o /-c -nologo -Fo/'                                                    ./lib/Makefile ./src/Makefile
+  sed -i 's@^AR = .*@AR = lib /nologo@'                                                ./lib/Makefile
   sed -i '/$(libgreputils_a_AR)/s/ lib/lib/'                                           ./lib/Makefile
   sed -i 's%^am_libgreputils_a_OBJECTS = %&getpagesize.$(OBJEXT) stat-w32.$(OBJEXT) %' ./lib/Makefile
   sed -i 's%^LINK = .*%LINK = link /nologo /OUT:$@%'                                   ./src/Makefile
   sed -i 's/^COLORIZE_SOURCE = .*/COLORIZE_SOURCE = colorize-w32.c/'                   ./lib/Makefile
 
-12) add gen target:
+12) if building with Microsoft Visual Studio 2008, to avoid linker error, add libcpmt.lib to the link command:
+  sed -i 's%^LINK = .*%& libcpmt.lib%'                                                 ./src/Makefile
+
+13) add gen target:
   echo 'gen:'                  >> ./Makefile
   echo 'gen:'                  >> ./src/Makefile
   echo 'gen: $(BUILT_SOURCES)' >> ./lib/Makefile
   echo 'gen-am:'               >> ./Makefile
 
-13) execute Makefile to generate grep headers:
+14) execute Makefile to generate grep headers:
   make gen
 
-14) some references to system header files are missing in generated headers - they need to be fixed manually.
+15) some references to system header files are missing in generated headers - they need to be fixed manually.
 
  a) set paths to locations of Build Tools for Visual Studio 2022 and WDK10 in grep-3.6-win-headers.patch (assume it was copied to the current directory):
   for example, if Microsoft Build Tools for Visual Studio 2022 is installed in "C:\Program Files (x86)" and WDK10 installed in "C:\Program Files (x86)"
@@ -74,12 +80,16 @@ From CYGWIN shell:
 
   (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.6-win-headers.patch)
 
-;  --tip: for Visual Studio 2008:
-;  sed -i '/Visual Studio/s@.:.*include@C:\\Program Files (x86)\\Microsoft Visual Studio 9.0\\VC\\include@' ./grep-3.6-win-headers.patch
-;  sed -i '/Windows Kits/s@.:.*ucrt@C:\\Program Files (x86)\\Microsoft Visual Studio 9.0\\VC\\include@' ./grep-3.6-win-headers.patch
+  --tip: for Visual Studio 2008:
+  sed -i '/Visual Studio/s@.:.*include@C:\\Program Files (x86)\\Microsoft Visual Studio 9.0\\VC\\include@' ./grep-3.6-win-headers.patch
+  sed -i '/Windows Kits/s@.:.*ucrt@C:\\Program Files (x86)\\Microsoft Visual Studio 9.0\\VC\\include@' ./grep-3.6-win-headers.patch
 
  b) now patch the previously generated headers with updated patch-file:
   patch -Np1 -i ./grep-3.6-win-headers.patch
+
+  --note: for Visual Studio 2008, patching of "lib/inttypes.h" and "lib/stdint.h" is not needed, so next errors may be safely ignored:
+  1 out of 1 hunk FAILED -- saving rejects to file lib/inttypes.h.rej
+  1 out of 1 hunk FAILED -- saving rejects to file lib/stdint.h.rej
 
  c) header file lib/unistd.h is generated erroneously, fix it:
   patch -Np1 -i grep-3.6-unistd.patch
@@ -89,10 +99,10 @@ From CYGWIN shell:
   patch -Np1 -i grep-3.6-mbtowc-lock.patch
   (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.6-mbtowc-lock.patch)
 
-15) do compile grep:
+16) do compile grep:
   make > make.bat
 
-16) check build result:
+17) check build result:
   ./src/grep.exe --version
 
   (should print grep version, e.g.: (GNU grep) 3.7)
@@ -148,18 +158,30 @@ Now it is possible to create a patch file - for compiling optimized grep.exe usi
     ./config.log \
     ./config.status
 
+If building with Microsoft Visual Studio 2008, remove patch-rejected files:
+  rm -v \
+    ./lib/inttypes.h.rej \
+    ./lib/stdint.h.rej
+
 5) after this, diff should print something like:
 
   diff -rql . ../orig/grep-3.7
   Only in .: config.h
   Only in ./lib: alloca.h
+* Files ./lib/calloc.c and ../orig/grep-3.7/lib/calloc.c differ
   Only in ./lib: colorize.c
   Only in ./lib: configmake.h
   Only in ./lib: ctype.h
+* Files ./lib/dfa.c and ../orig/grep-3.7/lib/dfa.c differ
   Only in ./lib: dirent.h
   Only in ./lib: errno.h
+* Files ./lib/exclude.c and ../orig/grep-3.7/lib/exclude.c differ
   Only in ./lib: fcntl.h
+* Files ./lib/filenamecat-lgpl.c and ../orig/grep-3.7/lib/filenamecat-lgpl.c differ
+* Files ./lib/fnmatch.c and ../orig/grep-3.7/lib/fnmatch.c differ
   Only in ./lib: fnmatch.h
+* Files ./lib/fnmatch_loop.c and ../orig/grep-3.7/lib/fnmatch_loop.c differ
+* Files ./lib/fstat.c and ../orig/grep-3.7/lib/fstat.c differ
   Files ./lib/fts.c and ../orig/grep-3.7/lib/fts.c differ
   Only in ./lib: getopt-cdefs.h
   Only in ./lib: getopt.h
@@ -167,13 +189,26 @@ Now it is possible to create a patch file - for compiling optimized grep.exe usi
   Only in ./lib: langinfo.h
   Only in ./lib: limits.h
   Only in ./lib: locale.h
+* Files ./lib/localeinfo.c and ../orig/grep-3.7/lib/localeinfo.c differ
   Only in ./lib/malloc: dynarray-skeleton.gl.h
   Only in ./lib/malloc: dynarray.gl.h
+* Files ./lib/malloc/dynarray_emplace_enlarge.c and ../orig/grep-3.7/lib/malloc/dynarray_emplace_enlarge.c differ
+* Files ./lib/malloc/dynarray_finalize.c and ../orig/grep-3.7/lib/malloc/dynarray_finalize.c differ
+* Files ./lib/malloc/dynarray_resize.c and ../orig/grep-3.7/lib/malloc/dynarray_resize.c differ
+* Files ./lib/malloc/dynarray_resize_clear.c and ../orig/grep-3.7/lib/malloc/dynarray_resize_clear.c differ
+* Files ./lib/malloc.c and ../orig/grep-3.7/lib/malloc.c differ
+* Files ./lib/malloca.c and ../orig/grep-3.7/lib/malloca.c differ
   Files ./lib/mbtowc-lock.c and ../orig/grep-3.7/lib/mbtowc-lock.c differ
   Files ./lib/mbtowc-lock.h and ../orig/grep-3.7/lib/mbtowc-lock.h differ
+* Files ./lib/opendirat.c and ../orig/grep-3.7/lib/opendirat.c differ
+* Files ./lib/realloc.c and ../orig/grep-3.7/lib/realloc.c differ
+* Files ./lib/regcomp.c and ../orig/grep-3.7/lib/regcomp.c differ
+* Files ./lib/regexec.c and ../orig/grep-3.7/lib/regexec.c differ
   Only in ./lib: signal.h
   Only in ./lib: sigsegv.h
+* Files ./lib/stat-w32.c and ../orig/grep-3.7/lib/stat-w32.c differ
   Only in ./lib: stdalign.h
+? Only in ./lib: stdbool.h
   Only in ./lib: stddef.h
   Only in ./lib: stdint.h
   Only in ./lib: stdio.h
@@ -187,11 +222,16 @@ Now it is possible to create a patch file - for compiling optimized grep.exe usi
   Only in ./lib: uniwidth.h
   Only in ./lib: wchar.h
   Only in ./lib: wctype.h
+* Files ./lib/xmalloc.c and ../orig/grep-3.7/lib/xmalloc.c differ
   Only in .: make.bat
+* Files ./src/dfasearch.c and ../orig/grep-3.7/src/dfasearch.c differ
   Files ./src/grep.c and ../orig/grep-3.7/src/grep.c differ
+* Files ./src/kwsearch.c and ../orig/grep-3.7/src/kwsearch.c differ
+* Files ./src/kwset.c and ../orig/grep-3.7/src/kwset.c differ
+* Files ./src/searchutils.c and ../orig/grep-3.7/src/searchutils.c differ
 
-;If patch grep-3.7-src-non-c99.patch was applied, diff will print additional differences:
-;
+* -- if grep-3.7-src-non-c99.patch was applied
+? -- if configured under Visual Studio 2008
 
 6) edit make.bat
 
@@ -208,12 +248,12 @@ Now it is possible to create a patch file - for compiling optimized grep.exe usi
   sed -i 's@.`@@' make.bat
   sed -i '/^lib/s@ .nologo .OUT:@@;/^lib/s@  *$@@g;/^lib/s@ @ .\\lib\\@g;s@^lib@lib /LTCG /nologo /OUT:@' make.bat
   sed -i '/^link/s@..\\lib\\libgreputils.a@@g' make.bat
-  sed -i '/^link/s@ .nologo .OUT:@@;/^link/s@  *$@@g;/^link/s@ @ .\\src\\@g' make.bat
+  sed -i '/^link/s@ .nologo .OUT:@@;/^link/s@  *$@@g;/^link/s@\([^ ]*.obj\)@.\\src\\&@g' make.bat
   sed -i 's@^link@link /LTCG /nologo .\\libgreputils.a /OUT:@' make.bat
   rm make.bat.old
 
 7) finally, create a patch:
   diff -Naur ../orig/grep-3.7 . > ../grep-3.7-build-VS22-x64.patch
 
-; or, for Visual Studio 2008:
-;  diff -Naur ../orig/grep-3.7 . > ../grep-3.7-build-VS9-x86.patch
+ or, for Visual Studio 2008:
+  diff -Naur ../orig/grep-3.7 . > ../grep-3.7-build-VS9-x86.patch

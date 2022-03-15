@@ -19,8 +19,8 @@ From CYGWIN shell:
   cd grep-3.7
 
 4) fix sources for windows:
-  patch -Np1 -i grep-3.6-src.patch
-  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.6-src.patch)
+  patch -Np1 -i grep-3.7-src.patch
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.7-src.patch)
 
 5) to build with old non-c99 compiler (such as Microsoft Visual Studio 2008) apply one more patch:
   patch -Np1 -i grep-3.7-src-non-c99.patch
@@ -128,7 +128,6 @@ Now it is possible to create a patch file - for compiling optimized grep.exe usi
     ./stamp-h1 \
     ./grep-3.6-win-headers.patch \
     ./src/*.obj \
-	./src/*.c.orig \
     ./lib/*.obj \
     ./lib/*.h.orig \
     ./lib/glthread/*.obj \
@@ -250,6 +249,7 @@ If building with Microsoft Visual Studio 2008, remove patch-rejected files:
   sed -i '/^link/s@..\\lib\\libgreputils.a@@g' make.bat
   sed -i '/^link/s@ .nologo .OUT:@@;/^link/s@  *$@@g;/^link/s@\([^ ]*.obj\)@.\\src\\&@g' make.bat
   sed -i 's@^link@link /LTCG /nologo .\\libgreputils.a /OUT:@' make.bat
+  sed -i 's@.*@& || exit /b 1@' make.bat
   rm make.bat.old
 
 7) finally, create a patch:

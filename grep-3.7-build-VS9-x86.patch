@@ -11461,12 +11461,12 @@ diff -Naur ../orig/grep-3.7/lib/realloc.c ./lib/realloc.c
    if (result == NULL)
 diff -Naur ../orig/grep-3.7/lib/regcomp.c ./lib/regcomp.c
 --- ../orig/grep-3.7/lib/regcomp.c	2021-06-07 18:02:20.000000000 +0300
-+++ ./lib/regcomp.c	2021-11-17 11:09:42.265646100 +0300
++++ ./lib/regcomp.c	2022-03-14 13:20:24.459586900 +0300
 @@ -3655,6 +3655,7 @@
  #endif /* not RE_ENABLE_I18N */
    reg_errcode_t ret;
    bin_tree_t *tree;
-+  re_token_t br_token;
++  re_token_t br_token = {0};
  
    sbcset = (re_bitset_ptr_t) calloc (sizeof (bitset_t), 1);
    if (__glibc_unlikely (sbcset == NULL))
@@ -11485,14 +11485,14 @@ diff -Naur ../orig/grep-3.7/lib/regcomp.c ./lib/regcomp.c
  	     re_token_type_t type)
  {
 -  re_token_t t = { .type = type };
-+  re_token_t t;
++  re_token_t t = {0};
 +  t.type = type;
    return create_token_tree (dfa, left, right, &t);
  }
  
 diff -Naur ../orig/grep-3.7/lib/regexec.c ./lib/regexec.c
 --- ../orig/grep-3.7/lib/regexec.c	2021-07-15 06:47:29.000000000 +0300
-+++ ./lib/regexec.c	2021-11-17 11:09:42.265646100 +0300
++++ ./lib/regexec.c	2022-03-14 13:20:24.459586900 +0300
 @@ -598,11 +598,12 @@
    Idx extra_nmatch;
    bool sb;
@@ -11502,7 +11502,7 @@ diff -Naur ../orig/grep-3.7/lib/regexec.c ./lib/regexec.c
  		    && start != last_start && !preg->can_be_null)
  		   ? preg->fastmap : NULL);
    RE_TRANSLATE_TYPE t = preg->translate;
-+  re_match_context_t mctx;
++  re_match_context_t mctx = {0};
 +  *(const re_dfa_t **)&mctx.dfa = dfa;
  
    extra_nmatch = (nmatch > preg->re_nsub) ? nmatch - (preg->re_nsub + 1) : 0;
@@ -29256,154 +29256,154 @@ diff -Naur ../orig/grep-3.7/make.bat ./make.bat
 --- ../orig/grep-3.7/make.bat	1970-01-01 03:00:00.000000000 +0300
 +++ ./make.bat	2021-11-17 11:20:23.032063900 +0300
 @@ -0,0 +1,148 @@
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getpagesize.obj lib\getpagesize.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stat-w32.obj lib\stat-w32.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\argmatch.obj lib\argmatch.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-proc.obj lib\openat-proc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\basename-lgpl.obj lib\basename-lgpl.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\binary-io.obj lib\binary-io.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\bitrotate.obj lib\bitrotate.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-ctype.obj lib\c-ctype.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-stack.obj lib\c-stack.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-strcasecmp.obj lib\c-strcasecmp.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-strncasecmp.obj lib\c-strncasecmp.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\cloexec.obj lib\cloexec.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\close-stream.obj lib\close-stream.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\closeout.obj lib\closeout.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\cycle-check.obj lib\cycle-check.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dfa.obj lib\dfa.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\localeinfo.obj lib\localeinfo.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dirname-lgpl.obj lib\dirname-lgpl.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stripslash.obj lib\stripslash.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_at_failure.obj lib\malloc\dynarray_at_failure.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_emplace_enlarge.obj lib\malloc\dynarray_emplace_enlarge.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_finalize.obj lib\malloc\dynarray_finalize.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_resize.obj lib\malloc\dynarray_resize.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_resize_clear.obj lib\malloc\dynarray_resize_clear.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\exclude.obj lib\exclude.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\exitfail.obj lib\exitfail.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\creat-safer.obj lib\creat-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\open-safer.obj lib\open-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-hook.obj lib\fd-hook.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-safer-flag.obj lib\fd-safer-flag.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup-safer-flag.obj lib\dup-safer-flag.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\filenamecat-lgpl.obj lib\filenamecat-lgpl.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getprogname.obj lib\getprogname.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\hard-locale.obj lib\hard-locale.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\hash.obj lib\hash.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\i-ring.obj lib\i-ring.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\ialloc.obj lib\ialloc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\localcharset.obj lib\localcharset.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\glthread\lock.obj lib\glthread\lock.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloca.obj lib\malloca.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbchar.obj lib\mbchar.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbiter.obj lib\mbiter.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbscasecmp.obj lib\mbscasecmp.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbslen.obj lib\mbslen.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsstr.obj lib\mbsstr.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbuiter.obj lib\mbuiter.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\memchr2.obj lib\memchr2.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-die.obj lib\openat-die.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-safer.obj lib\openat-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\opendirat.obj lib\opendirat.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\propername.obj lib\propername.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\quotearg.obj lib\quotearg.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\safe-read.obj lib\safe-read.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\save-cwd.obj lib\save-cwd.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\setlocale_null.obj lib\setlocale_null.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\sigsegv.obj lib\sigsegv.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stackvma.obj lib\stackvma.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stat-time.obj lib\stat-time.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\striconv.obj lib\striconv.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strnlen1.obj lib\strnlen1.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\glthread\threadlib.obj lib\glthread\threadlib.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\trim.obj lib\trim.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistd.obj lib\unistd.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup-safer.obj lib\dup-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-safer.obj lib\fd-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\pipe-safer.obj lib\pipe-safer.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-mbtoucr.obj lib\unistr\u8-mbtoucr.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-uctomb.obj lib\unistr\u8-uctomb.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-uctomb-aux.obj lib\unistr\u8-uctomb-aux.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\uniwidth\width.obj lib\uniwidth\width.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\version-etc.obj lib\version-etc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\version-etc-fsf.obj lib\version-etc-fsf.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wctype-h.obj lib\wctype-h.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xmalloc.obj lib\xmalloc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xalloc-die.obj lib\xalloc-die.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xbinary-io.obj lib\xbinary-io.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstriconv.obj lib\xstriconv.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtoimax.obj lib\xstrtoimax.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtol.obj lib\xstrtol.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtoul.obj lib\xstrtoul.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\colorize.obj lib\colorize.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\calloc.obj lib\calloc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\chdir-long.obj lib\chdir-long.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\close.obj lib\close.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\closedir.obj lib\closedir.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dirfd.obj lib\dirfd.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup.obj lib\dup.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup2.obj lib\dup2.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\error.obj lib\error.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fchdir.obj lib\fchdir.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fcntl.obj lib\fcntl.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fdopendir.obj lib\fdopendir.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fnmatch.obj lib\fnmatch.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fopen.obj lib\fopen.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fpending.obj lib\fpending.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\free.obj lib\free.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fstat.obj lib\fstat.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fstatat.obj lib\fstatat.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fts.obj lib\fts.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getcwd-lgpl.obj lib\getcwd-lgpl.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getdtablesize.obj lib\getdtablesize.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getopt.obj lib\getopt.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getopt1.obj lib\getopt1.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\isblank.obj lib\isblank.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\iswctype.obj lib\iswctype.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\lc-charset-dispatch.obj lib\lc-charset-dispatch.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc.obj lib\malloc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbrlen.obj lib\mbrlen.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbrtowc.obj lib\mbrtowc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsinit.obj lib\mbsinit.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsrtowcs.obj lib\mbsrtowcs.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsrtowcs-state.obj lib\mbsrtowcs-state.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbtowc-lock.obj lib\mbtowc-lock.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mempcpy.obj lib\mempcpy.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\memrchr.obj lib\memrchr.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\msvc-inval.obj lib\msvc-inval.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\msvc-nothrow.obj lib\msvc-nothrow.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\nl_langinfo.obj lib\nl_langinfo.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\obstack.obj lib\obstack.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\open.obj lib\open.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat.obj lib\openat.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\opendir.obj lib\opendir.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\pipe.obj lib\pipe.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\raise.obj lib\raise.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\rawmemchr.obj lib\rawmemchr.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\read.obj lib\read.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\readdir.obj lib\readdir.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\realloc.obj lib\realloc.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\reallocarray.obj lib\reallocarray.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\regex.obj lib\regex.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stpcpy.obj lib\stpcpy.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strerror.obj lib\strerror.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strerror-override.obj lib\strerror-override.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strstr.obj lib\strstr.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoimax.obj lib\strtoimax.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoll.obj lib\strtoll.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoull.obj lib\strtoull.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoumax.obj lib\strtoumax.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wctob.obj lib\wctob.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wcwidth.obj lib\wcwidth.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wmempcpy.obj lib\wmempcpy.c
-+lib /LTCG /nologo /OUT:libgreputils.a .\lib\getpagesize.obj .\lib\stat-w32.obj .\lib\argmatch.obj .\lib\openat-proc.obj .\lib\basename-lgpl.obj .\lib\binary-io.obj .\lib\bitrotate.obj .\lib\c-ctype.obj .\lib\c-stack.obj .\lib\c-strcasecmp.obj .\lib\c-strncasecmp.obj .\lib\cloexec.obj .\lib\close-stream.obj .\lib\closeout.obj .\lib\cycle-check.obj .\lib\dfa.obj .\lib\localeinfo.obj .\lib\dirname-lgpl.obj .\lib\stripslash.obj .\lib\malloc\dynarray_at_failure.obj .\lib\malloc\dynarray_emplace_enlarge.obj .\lib\malloc\dynarray_finalize.obj .\lib\malloc\dynarray_resize.obj .\lib\malloc\dynarray_resize_clear.obj .\lib\exclude.obj .\lib\exitfail.obj .\lib\creat-safer.obj .\lib\open-safer.obj .\lib\fd-hook.obj .\lib\fd-safer-flag.obj .\lib\dup-safer-flag.obj .\lib\filenamecat-lgpl.obj .\lib\getprogname.obj .\lib\hard-locale.obj .\lib\hash.obj .\lib\i-ring.obj .\lib\ialloc.obj .\lib\localcharset.obj .\lib\glthread\lock.obj .\lib\malloca.obj .\lib\mbchar.obj .\lib\mbiter.obj .\lib\mbscasecmp.obj .\lib\mbslen.obj .\lib\mbsstr.obj .\lib\mbuiter.obj .\lib\memchr2.obj .\lib\openat-die.obj .\lib\openat-safer.obj .\lib\opendirat.obj .\lib\propername.obj .\lib\quotearg.obj .\lib\safe-read.obj .\lib\save-cwd.obj .\lib\setlocale_null.obj .\lib\sigsegv.obj .\lib\stackvma.obj .\lib\stat-time.obj .\lib\striconv.obj .\lib\strnlen1.obj .\lib\glthread\threadlib.obj .\lib\trim.obj .\lib\unistd.obj .\lib\dup-safer.obj .\lib\fd-safer.obj .\lib\pipe-safer.obj .\lib\unistr\u8-mbtoucr.obj .\lib\unistr\u8-uctomb.obj .\lib\unistr\u8-uctomb-aux.obj .\lib\uniwidth\width.obj .\lib\version-etc.obj .\lib\version-etc-fsf.obj .\lib\wctype-h.obj .\lib\xmalloc.obj .\lib\xalloc-die.obj .\lib\xbinary-io.obj .\lib\xstriconv.obj .\lib\xstrtoimax.obj .\lib\xstrtol.obj .\lib\xstrtoul.obj .\lib\colorize.obj .\lib\calloc.obj .\lib\chdir-long.obj .\lib\close.obj .\lib\closedir.obj .\lib\dirfd.obj .\lib\dup.obj .\lib\dup2.obj .\lib\error.obj .\lib\fchdir.obj .\lib\fcntl.obj .\lib\fdopendir.obj .\lib\fnmatch.obj .\lib\fopen.obj .\lib\fpending.obj .\lib\free.obj .\lib\fstat.obj .\lib\fstatat.obj .\lib\fts.obj .\lib\getcwd-lgpl.obj .\lib\getdtablesize.obj .\lib\getopt.obj .\lib\getopt1.obj .\lib\isblank.obj .\lib\iswctype.obj .\lib\lc-charset-dispatch.obj .\lib\malloc.obj .\lib\mbrlen.obj .\lib\mbrtowc.obj .\lib\mbsinit.obj .\lib\mbsrtowcs.obj .\lib\mbsrtowcs-state.obj .\lib\mbtowc-lock.obj .\lib\mempcpy.obj .\lib\memrchr.obj .\lib\msvc-inval.obj .\lib\msvc-nothrow.obj .\lib\nl_langinfo.obj .\lib\obstack.obj .\lib\open.obj .\lib\openat.obj .\lib\opendir.obj .\lib\pipe.obj .\lib\raise.obj .\lib\rawmemchr.obj .\lib\read.obj .\lib\readdir.obj .\lib\realloc.obj .\lib\reallocarray.obj .\lib\regex.obj .\lib\stpcpy.obj .\lib\strerror.obj .\lib\strerror-override.obj .\lib\strstr.obj .\lib\strtoimax.obj .\lib\strtoll.obj .\lib\strtoull.obj .\lib\strtoumax.obj .\lib\wctob.obj .\lib\wcwidth.obj .\lib\wmempcpy.obj
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\dfasearch.obj src\dfasearch.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\grep.obj src\grep.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\kwsearch.obj src\kwsearch.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\kwset.obj src\kwset.c
-+cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\searchutils.obj src\searchutils.c
-+link /LTCG /nologo .\libgreputils.a /OUT:grep.exe libcpmt.lib .\src\dfasearch.obj .\src\grep.obj .\src\kwsearch.obj .\src\kwset.obj .\src\searchutils.obj
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getpagesize.obj lib\getpagesize.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stat-w32.obj lib\stat-w32.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\argmatch.obj lib\argmatch.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-proc.obj lib\openat-proc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\basename-lgpl.obj lib\basename-lgpl.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\binary-io.obj lib\binary-io.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\bitrotate.obj lib\bitrotate.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-ctype.obj lib\c-ctype.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-stack.obj lib\c-stack.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-strcasecmp.obj lib\c-strcasecmp.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\c-strncasecmp.obj lib\c-strncasecmp.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\cloexec.obj lib\cloexec.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\close-stream.obj lib\close-stream.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\closeout.obj lib\closeout.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\cycle-check.obj lib\cycle-check.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dfa.obj lib\dfa.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\localeinfo.obj lib\localeinfo.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dirname-lgpl.obj lib\dirname-lgpl.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stripslash.obj lib\stripslash.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_at_failure.obj lib\malloc\dynarray_at_failure.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_emplace_enlarge.obj lib\malloc\dynarray_emplace_enlarge.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_finalize.obj lib\malloc\dynarray_finalize.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_resize.obj lib\malloc\dynarray_resize.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc\dynarray_resize_clear.obj lib\malloc\dynarray_resize_clear.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\exclude.obj lib\exclude.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\exitfail.obj lib\exitfail.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\creat-safer.obj lib\creat-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\open-safer.obj lib\open-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-hook.obj lib\fd-hook.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-safer-flag.obj lib\fd-safer-flag.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup-safer-flag.obj lib\dup-safer-flag.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\filenamecat-lgpl.obj lib\filenamecat-lgpl.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getprogname.obj lib\getprogname.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\hard-locale.obj lib\hard-locale.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\hash.obj lib\hash.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\i-ring.obj lib\i-ring.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\ialloc.obj lib\ialloc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\localcharset.obj lib\localcharset.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\glthread\lock.obj lib\glthread\lock.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloca.obj lib\malloca.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbchar.obj lib\mbchar.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbiter.obj lib\mbiter.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbscasecmp.obj lib\mbscasecmp.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbslen.obj lib\mbslen.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsstr.obj lib\mbsstr.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbuiter.obj lib\mbuiter.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\memchr2.obj lib\memchr2.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-die.obj lib\openat-die.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat-safer.obj lib\openat-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\opendirat.obj lib\opendirat.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\propername.obj lib\propername.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\quotearg.obj lib\quotearg.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\safe-read.obj lib\safe-read.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\save-cwd.obj lib\save-cwd.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\setlocale_null.obj lib\setlocale_null.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\sigsegv.obj lib\sigsegv.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stackvma.obj lib\stackvma.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stat-time.obj lib\stat-time.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\striconv.obj lib\striconv.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strnlen1.obj lib\strnlen1.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\glthread\threadlib.obj lib\glthread\threadlib.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\trim.obj lib\trim.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistd.obj lib\unistd.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup-safer.obj lib\dup-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fd-safer.obj lib\fd-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\pipe-safer.obj lib\pipe-safer.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-mbtoucr.obj lib\unistr\u8-mbtoucr.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-uctomb.obj lib\unistr\u8-uctomb.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\unistr\u8-uctomb-aux.obj lib\unistr\u8-uctomb-aux.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\uniwidth\width.obj lib\uniwidth\width.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\version-etc.obj lib\version-etc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\version-etc-fsf.obj lib\version-etc-fsf.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wctype-h.obj lib\wctype-h.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xmalloc.obj lib\xmalloc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xalloc-die.obj lib\xalloc-die.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xbinary-io.obj lib\xbinary-io.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstriconv.obj lib\xstriconv.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtoimax.obj lib\xstrtoimax.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtol.obj lib\xstrtol.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\xstrtoul.obj lib\xstrtoul.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\colorize.obj lib\colorize.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\calloc.obj lib\calloc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\chdir-long.obj lib\chdir-long.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\close.obj lib\close.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\closedir.obj lib\closedir.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dirfd.obj lib\dirfd.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup.obj lib\dup.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\dup2.obj lib\dup2.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\error.obj lib\error.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fchdir.obj lib\fchdir.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fcntl.obj lib\fcntl.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fdopendir.obj lib\fdopendir.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fnmatch.obj lib\fnmatch.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fopen.obj lib\fopen.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fpending.obj lib\fpending.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\free.obj lib\free.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fstat.obj lib\fstat.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fstatat.obj lib\fstatat.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\fts.obj lib\fts.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getcwd-lgpl.obj lib\getcwd-lgpl.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getdtablesize.obj lib\getdtablesize.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getopt.obj lib\getopt.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\getopt1.obj lib\getopt1.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\isblank.obj lib\isblank.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\iswctype.obj lib\iswctype.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\lc-charset-dispatch.obj lib\lc-charset-dispatch.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\malloc.obj lib\malloc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbrlen.obj lib\mbrlen.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbrtowc.obj lib\mbrtowc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsinit.obj lib\mbsinit.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsrtowcs.obj lib\mbsrtowcs.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbsrtowcs-state.obj lib\mbsrtowcs-state.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mbtowc-lock.obj lib\mbtowc-lock.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\mempcpy.obj lib\mempcpy.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\memrchr.obj lib\memrchr.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\msvc-inval.obj lib\msvc-inval.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\msvc-nothrow.obj lib\msvc-nothrow.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\nl_langinfo.obj lib\nl_langinfo.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\obstack.obj lib\obstack.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\open.obj lib\open.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\openat.obj lib\openat.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\opendir.obj lib\opendir.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\pipe.obj lib\pipe.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\raise.obj lib\raise.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\rawmemchr.obj lib\rawmemchr.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\read.obj lib\read.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\readdir.obj lib\readdir.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\realloc.obj lib\realloc.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\reallocarray.obj lib\reallocarray.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\regex.obj lib\regex.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\stpcpy.obj lib\stpcpy.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strerror.obj lib\strerror.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strerror-override.obj lib\strerror-override.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strstr.obj lib\strstr.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoimax.obj lib\strtoimax.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoll.obj lib\strtoll.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoull.obj lib\strtoull.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\strtoumax.obj lib\strtoumax.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wctob.obj lib\wctob.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wcwidth.obj lib\wcwidth.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Folib\wmempcpy.obj lib\wmempcpy.c || exit /b 1
++lib /LTCG /nologo /OUT:libgreputils.a .\lib\getpagesize.obj .\lib\stat-w32.obj .\lib\argmatch.obj .\lib\openat-proc.obj .\lib\basename-lgpl.obj .\lib\binary-io.obj .\lib\bitrotate.obj .\lib\c-ctype.obj .\lib\c-stack.obj .\lib\c-strcasecmp.obj .\lib\c-strncasecmp.obj .\lib\cloexec.obj .\lib\close-stream.obj .\lib\closeout.obj .\lib\cycle-check.obj .\lib\dfa.obj .\lib\localeinfo.obj .\lib\dirname-lgpl.obj .\lib\stripslash.obj .\lib\malloc\dynarray_at_failure.obj .\lib\malloc\dynarray_emplace_enlarge.obj .\lib\malloc\dynarray_finalize.obj .\lib\malloc\dynarray_resize.obj .\lib\malloc\dynarray_resize_clear.obj .\lib\exclude.obj .\lib\exitfail.obj .\lib\creat-safer.obj .\lib\open-safer.obj .\lib\fd-hook.obj .\lib\fd-safer-flag.obj .\lib\dup-safer-flag.obj .\lib\filenamecat-lgpl.obj .\lib\getprogname.obj .\lib\hard-locale.obj .\lib\hash.obj .\lib\i-ring.obj .\lib\ialloc.obj .\lib\localcharset.obj .\lib\glthread\lock.obj .\lib\malloca.obj .\lib\mbchar.obj .\lib\mbiter.obj .\lib\mbscasecmp.obj .\lib\mbslen.obj .\lib\mbsstr.obj .\lib\mbuiter.obj .\lib\memchr2.obj .\lib\openat-die.obj .\lib\openat-safer.obj .\lib\opendirat.obj .\lib\propername.obj .\lib\quotearg.obj .\lib\safe-read.obj .\lib\save-cwd.obj .\lib\setlocale_null.obj .\lib\sigsegv.obj .\lib\stackvma.obj .\lib\stat-time.obj .\lib\striconv.obj .\lib\strnlen1.obj .\lib\glthread\threadlib.obj .\lib\trim.obj .\lib\unistd.obj .\lib\dup-safer.obj .\lib\fd-safer.obj .\lib\pipe-safer.obj .\lib\unistr\u8-mbtoucr.obj .\lib\unistr\u8-uctomb.obj .\lib\unistr\u8-uctomb-aux.obj .\lib\uniwidth\width.obj .\lib\version-etc.obj .\lib\version-etc-fsf.obj .\lib\wctype-h.obj .\lib\xmalloc.obj .\lib\xalloc-die.obj .\lib\xbinary-io.obj .\lib\xstriconv.obj .\lib\xstrtoimax.obj .\lib\xstrtol.obj .\lib\xstrtoul.obj .\lib\colorize.obj .\lib\calloc.obj .\lib\chdir-long.obj .\lib\close.obj .\lib\closedir.obj .\lib\dirfd.obj .\lib\dup.obj .\lib\dup2.obj .\lib\error.obj .\lib\fchdir.obj .\lib\fcntl.obj .\lib\fdopendir.obj .\lib\fnmatch.obj .\lib\fopen.obj .\lib\fpending.obj .\lib\free.obj .\lib\fstat.obj .\lib\fstatat.obj .\lib\fts.obj .\lib\getcwd-lgpl.obj .\lib\getdtablesize.obj .\lib\getopt.obj .\lib\getopt1.obj .\lib\isblank.obj .\lib\iswctype.obj .\lib\lc-charset-dispatch.obj .\lib\malloc.obj .\lib\mbrlen.obj .\lib\mbrtowc.obj .\lib\mbsinit.obj .\lib\mbsrtowcs.obj .\lib\mbsrtowcs-state.obj .\lib\mbtowc-lock.obj .\lib\mempcpy.obj .\lib\memrchr.obj .\lib\msvc-inval.obj .\lib\msvc-nothrow.obj .\lib\nl_langinfo.obj .\lib\obstack.obj .\lib\open.obj .\lib\openat.obj .\lib\opendir.obj .\lib\pipe.obj .\lib\raise.obj .\lib\rawmemchr.obj .\lib\read.obj .\lib\readdir.obj .\lib\realloc.obj .\lib\reallocarray.obj .\lib\regex.obj .\lib\stpcpy.obj .\lib\strerror.obj .\lib\strerror-override.obj .\lib\strstr.obj .\lib\strtoimax.obj .\lib\strtoll.obj .\lib\strtoull.obj .\lib\strtoumax.obj .\lib\wctob.obj .\lib\wcwidth.obj .\lib\wmempcpy.obj || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\dfasearch.obj src\dfasearch.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\grep.obj src\grep.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\kwsearch.obj src\kwsearch.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\kwset.obj src\kwset.c || exit /b 1
++cl -D_WIN32_WINNT=0x501 /I. /I.\lib /I.\src /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fosrc\searchutils.obj src\searchutils.c || exit /b 1
++link /LTCG /nologo .\libgreputils.a /OUT:grep.exe libcpmt.lib .\src\dfasearch.obj .\src\grep.obj .\src\kwsearch.obj .\src\kwset.obj .\src\searchutils.obj || exit /b 1
 diff -Naur ../orig/grep-3.7/src/dfasearch.c ./src/dfasearch.c
 --- ../orig/grep-3.7/src/dfasearch.c	2021-08-09 21:35:50.000000000 +0300
 +++ ./src/dfasearch.c	2021-11-17 11:09:42.275646100 +0300
@@ -29529,7 +29529,7 @@ diff -Naur ../orig/grep-3.7/src/dfasearch.c ./src/dfasearch.c
  }
 diff -Naur ../orig/grep-3.7/src/grep.c ./src/grep.c
 --- ../orig/grep-3.7/src/grep.c	2021-08-09 21:35:50.000000000 +0300
-+++ ./src/grep.c	2021-11-17 11:09:42.275646100 +0300
++++ ./src/grep.c	2022-03-14 13:20:24.469586900 +0300
 @@ -160,16 +160,18 @@
    ptrdiff_t fileline = 1;
    int prev_inserted = 0;
@@ -29880,7 +29880,7 @@ diff -Naur ../orig/grep-3.7/src/grep.c ./src/grep.c
                     (char *) NULL);
        puts (_("Written by Mike Haertel and others; see\n"
                "<https://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>."));
-+      puts (_("Patched by: Michael M. Builov <mbuilov@gmail.com>.\n"));
++      puts (_("Patched by: Michael M. Builov <mbuilov@yandex.ru>.\n"));
        return EXIT_SUCCESS;
      }
  

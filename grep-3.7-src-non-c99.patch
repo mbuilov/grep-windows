@@ -1582,7 +1582,7 @@ diff -Naur grep-3.7-x/lib/regcomp.c grep-3.7/lib/regcomp.c
  #endif /* not RE_ENABLE_I18N */
    reg_errcode_t ret;
    bin_tree_t *tree;
-+  re_token_t br_token;
++  re_token_t br_token = {0};
  
    sbcset = (re_bitset_ptr_t) calloc (sizeof (bitset_t), 1);
    if (__glibc_unlikely (sbcset == NULL))
@@ -1601,7 +1601,7 @@ diff -Naur grep-3.7-x/lib/regcomp.c grep-3.7/lib/regcomp.c
  	     re_token_type_t type)
  {
 -  re_token_t t = { .type = type };
-+  re_token_t t;
++  re_token_t t = {0};
 +  t.type = type;
    return create_token_tree (dfa, left, right, &t);
  }
@@ -1618,7 +1618,7 @@ diff -Naur grep-3.7-x/lib/regexec.c grep-3.7/lib/regexec.c
  		    && start != last_start && !preg->can_be_null)
  		   ? preg->fastmap : NULL);
    RE_TRANSLATE_TYPE t = preg->translate;
-+  re_match_context_t mctx;
++  re_match_context_t mctx = {0};
 +  *(const re_dfa_t **)&mctx.dfa = dfa;
  
    extra_nmatch = (nmatch > preg->re_nsub) ? nmatch - (preg->re_nsub + 1) : 0;

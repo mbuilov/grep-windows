@@ -1,0 +1,20 @@
+diff -Naur grep-3.6/lib/unistd.h grep-3.6-3/lib/unistd.h
+--- grep-3.6/lib/unistd.h	2021-06-30 18:40:50.936409700 +0300
++++ grep-3.6-3/lib/unistd.h	2021-06-30 17:48:29.007217900 +0300
+@@ -1838,7 +1838,7 @@
+ #endif
+ 
+ 
+-#if 1
++#if 0
+ # if 0
+ #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+ #   define getpagesize rpl_getpagesize
+@@ -1923,6 +1923,7 @@
+                  "use gnulib module getpagesize for portability");
+ # endif
+ #endif
++int getpagesize(void);
+ 
+ 
+ #if 0

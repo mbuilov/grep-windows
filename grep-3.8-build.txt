@@ -1,0 +1,45 @@
+How to build native 32/64-bit Gnu grep.exe with Visual Studio 2022 and WDK10
+
+----------------------------------------------------------------------------
+First, build pcre2.a and pcre2posix.a libraries (and pcre2grep.exe utility).
+
+From CYGWIN or other unix shell, in the working directory:
+
+1) get archive:         wget https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.40.tar.gz
+2) unpack archive:      tar xf pcre2-10.40.tar.gz
+3) go to PCRE2 sources: cd pcre2-pcre2-10.40
+4) copy files:
+                        cp ../NMakefile-pcre2-10.40       ./NMakefile
+                        cp ../config-pcre2-10.40.h        ./src/config.h
+                        cp ../RunGrepTest-pcre2-10.40.bat ./RunGrepTest.bat
+                        cp ./src/pcre2.h.generic          ./src/pcre2.h
+                        cp ./src/pcre2_chartables.c.dist  ./src/pcre2_chartables.c
+5) run dos prompt:      cmd /c "start cmd.exe"
+6) setup compiler:
+  for 64-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  for 32-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86
+7) compile and check:   nmake -f NMakefile check
+
+----------------------------------------------------------------------------
+Second, build Gnu Grep with PCRE support.
+
+From CYGWIN or other unix shell, in the same working directory which was used for the PCRE2 library build:
+
+1) get grep archive:    wget https://ftp.gnu.org/gnu/grep/grep-3.8.tar.xz
+2) unpack sed archive:  tar xf grep-3.8.tar.xz
+3) go to grep sources:  cd grep-3.8
+4) run dos prompt:      cmd /c "start cmd.exe"
+5) setup compiler:
+  for 64-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  for 32-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86
+6) temporary run sh:    sh
+7) copy build patch:
+  for 64-bit build:     cp ../grep-3.8-build-VS22-x64.patch ./build.patch
+  for 32-bit build:     cp ../grep-3.8-build-VS22-x86.patch ./build.patch
+8) fix build patch - change paths to locations of Visual Studio 2022 and WDK10:
+                        sed -i '/Visual Studio/s@.:.*include@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p')"'@' ./build.patch
+                        sed -i '/Windows Kits/s@.:.*ucrt@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p')"'@'                             ./build.patch
+9) patch grep:          patch -Np1 -i ./build.patch
+10) exit sh:            exit
+11) do compile:         make.bat
+12) check build result: grep.exe --version

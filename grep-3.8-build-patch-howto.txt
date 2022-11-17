@@ -1,0 +1,265 @@
+Instructions how to build native grep.exe with Microsoft Visual Studio (or Build Tools for Visual Studio) from CYGWIN shell.
+
+While building, it is possible to save build log and create a patch - for compiling grep.exe using only Microsoft Visual Studio tools, without need for CYGWIN.
+
+This is how grep-3.8-build-VS22-x64.patch and grep-3.8-build-VS22-x86.patch were created.
+
+
+----------------------------------------------------------------------------
+First, build pcre2.a and pcre2posix.a libraries (and pcre2grep.exe utility).
+
+From CYGWIN shell, in the working directory:
+
+1) get archive:
+  wget https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.40.tar.gz
+
+2) unpack archive:
+  tar xf pcre2-10.40.tar.gz
+
+3) go to PCRE2 sources:
+  cd pcre2-pcre2-10.40
+
+4) copy makefile, config.h, pcre2.h, RunGrepTest.bat and pcre2_chartables.c
+  cp ../NMakefile-pcre2-10.40       ./NMakefile
+  cp ../config-pcre2-10.40.h        ./src/config.h
+  cp ../RunGrepTest-pcre2-10.40.bat ./RunGrepTest.bat
+  cp ./src/pcre2.h.generic          ./src/pcre2.h
+  cp ./src/pcre2_chartables.c.dist  ./src/pcre2_chartables.c
+
+5) now start dos prompt:
+  cmd /c "start cmd.exe"
+
+In the dos window:
+
+7) setup compiler:
+  "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  (if Microsoft Build Tools for Visual Studio 2022 is installed in "C:\Program Files (x86)")
+
+  --tip: to build 32-bit version of PCRE2 library and pcre2grep.exe utility, specify "x86" instead of "amd64"
+
+8) build pcre2.a, pcre2posix.a and pcre2grep.exe, run tests: 
+  nmake -f NMakefile check
+
+
+----------------------------------------------------------------------------
+Second, build Gnu Grep with PCRE support.
+
+From CYGWIN shell, in the same working directory which was used for the PCRE2 library build:
+
+1) get archive:
+  wget https://ftp.gnu.org/gnu/grep/grep-3.8.tar.xz
+
+2) unpack archive:
+  tar xf grep-3.8.tar.xz
+
+3) go to grep sources:
+  cd grep-3.8
+
+4) fix sources for windows:
+  patch -Np1 -i grep-3.8-src.patch
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.8-src.patch)
+
+5) now start dos prompt:
+  cmd /c "start cmd.exe"
+
+6) setup compiler:
+  "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  (if Microsoft Build Tools for Visual Studio 2022 is installed in "C:\Program Files (x86)")
+
+  --tip: to build 32-bit version of the Gnu Grep utility, specify "x86" instead of "amd64"
+
+7) run bash from dos prompt (with environment prepared for compiling with Microsoft Build Tools for Visual Studio 2022):
+  bash
+
+8) check that Gnu Make is installed in CYGWIN and it is working (Gnu Make is required for the build):
+  make --version
+
+9) configure grep (assuming pcre2 library was built at ../pcre2-pcre2-10.40):
+  CFLAGS= CC=cl CPP="cl /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-pcre2-10.40/src" PCRE_LIBS=../../pcre2-pcre2-10.40/pcre2.a  ./configure --enable-threads=windows --disable-dependency-tracking --disable-silent-rules --disable-nls gl_cv_sys_struct_lconv_ok=yes pcre_cv_have_pcre2_compile=yes
+
+  --tip: when building 32-bit version of the Gnu Grep utility, add "/D_WIN32_WINNT=0x501" compiler switch:
+  CFLAGS= CC="cl /D_WIN32_WINNT=0x501" CPP="cl /D_WIN32_WINNT=0x501 /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-pcre2-10.40/src" PCRE_LIBS=../../pcre2-pcre2-10.40/pcre2.a  ./configure --enable-threads=windows --disable-dependency-tracking --disable-silent-rules --disable-nls gl_cv_sys_struct_lconv_ok=yes pcre_cv_have_pcre2_compile=yes
+
+10) configure script is not fully functional to create correct Makefiles - they are need to be fixed manually:
+  sed -i 's/^SUBDIRS = .*/SUBDIRS = lib src/'                                          ./Makefile
+  sed -i 's/^RECURSIVE_TARGETS = /&gen /'                                              ./Makefile
+  sed -i 's/-c -o /-c -nologo -Fo/'                                                    ./lib/Makefile ./src/Makefile
+  sed -i 's@^AR = .*@AR = lib /nologo@'                                                ./lib/Makefile
+  sed -i '/$(libgreputils_a_AR)/s/ lib/lib/'                                           ./lib/Makefile
+  sed -i 's%^am_libgreputils_a_OBJECTS = %&getpagesize.$(OBJEXT) stat-w32.$(OBJEXT) %' ./lib/Makefile
+  sed -i 's/^COLORIZE_SOURCE = .*/COLORIZE_SOURCE = colorize-w32.c/'                   ./lib/Makefile
+
+11) fix linker command:
+  sed -i 's%^LINK = .*%LINK = link /nologo /SUBSYSTEM:CONSOLE /OUT:$@%'                ./src/Makefile
+
+  --tip: when building 32-bit version of the Gnu Grep utility, specify "/SUBSYSTEM:CONSOLE,5.01" linker switch:
+  sed -i 's%^LINK = .*%LINK = link /nologo /SUBSYSTEM:CONSOLE,5.01 /OUT:$@%'           ./src/Makefile
+
+12) add gen target:
+  echo 'gen:'                  >> ./Makefile
+  echo 'gen:'                  >> ./src/Makefile
+  echo 'gen: $(BUILT_SOURCES)' >> ./lib/Makefile
+  echo 'gen-am:'               >> ./Makefile
+
+13) execute Makefile to generate grep headers:
+  make gen
+
+14) some references to system header files are missing in generated headers - they need to be fixed manually.
+
+ a) set paths to locations of Build Tools for Visual Studio 2022 and WDK10 in grep-3.8-win-headers.patch (assume it was copied to the current directory):
+
+  sed -i '/Visual Studio/s@.:.*include@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p')"'@' ./grep-3.8-win-headers.patch
+  sed -i '/Windows Kits/s@.:.*ucrt@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p')"'@'                             ./grep-3.8-win-headers.patch
+
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.8-win-headers.patch)
+
+  note: sub-command
+    env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p'
+    should extract path to MSVC headers, like:
+    C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.30.30705\\include
+
+  and sub-command
+    env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p'
+    should extract path to WDK headers, like:
+    C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22000.0\\ucrt
+
+ b) now patch the previously generated headers with updated patch-file:
+  patch -Np1 -i ./grep-3.8-win-headers.patch
+
+ c) header file lib/unistd.h is generated erroneously, fix it:
+  patch -Np1 -i grep-3.8-unistd.patch
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.8-unistd.patch)
+
+ d) fix build for the native Windows platform:
+  patch -Np1 -i grep-3.8-mbtowc-lock.patch
+  (patch location: https://raw.githubusercontent.com/mbuilov/grep-windows/master/grep-3.8-mbtowc-lock.patch)
+
+15) do compile grep:
+  make > make.bat
+
+16) check build result:
+  ./src/grep.exe --version
+
+  (should print grep version, e.g.: (GNU grep) 3.8)
+
+compilation should be ok, native (unoptimized) ./grep/grep.exe should be created.
+
+
+Now it is possible to create a patch file - for compiling optimized grep.exe using only Microsoft Visual Studio tools, without need for CYGWIN.
+
+1) create directory for unpatched grep:
+  mkdir ../orig
+
+2) unpack grep:
+  tar xf ../grep-3.8.tar.xz -C ../orig/
+
+3) diff current directory with original just unpacked grep-3.8.tar.xz in the '../orig' directory
+  diff -rql . ../orig/grep-3.8
+
+4) remove unneeded built files in the current directory (object files, libs, etc...)
+
+  rm -rv \
+    ./Makefile \
+    ./stamp-h1 \
+    ./grep-3.8-win-headers.patch \
+    ./src/*.obj \
+    ./lib/*.obj \
+    ./lib/glthread/*.obj \
+    ./lib/glthread/.deps \
+    ./lib/glthread/.dirstamp \
+    ./lib/unistr/*.obj \
+    ./lib/unistr/.deps \
+    ./lib/unistr/.dirstamp \
+    ./lib/uniwidth/*.obj \
+    ./lib/uniwidth/.deps \
+    ./lib/uniwidth/.dirstamp \
+    ./lib/malloc/*.obj \
+    ./lib/malloc/.deps \
+    ./lib/malloc/.dirstamp \
+    ./lib/libgreputils.a \
+    ./src/grep.exe \
+    ./src/egrep \
+    ./src/fgrep \
+    ./src/Makefile \
+    ./lib/Makefile \
+    ./doc/Makefile \
+    ./tests/Makefile \
+    ./gnulib-tests/Makefile \
+    ./po/Makefile \
+    ./po/Makefile.in \
+    ./po/POTFILES \
+    ./config.log \
+    ./config.status
+
+5) after this, diff should print:
+
+  diff -rql . ../orig/grep-3.8
+  Only in .: config.h
+  Only in ./lib: alloca.h
+  Only in ./lib: colorize.c
+  Only in ./lib: configmake.h
+  Only in ./lib: ctype.h
+  Only in ./lib: dirent.h
+  Only in ./lib: errno.h
+  Only in ./lib: fcntl.h
+  Only in ./lib: fnmatch.h
+  Files ./lib/fts.c and ../orig/grep-3.8/lib/fts.c differ
+  Only in ./lib: getopt-cdefs.h
+  Only in ./lib: getopt.h
+  Only in ./lib: inttypes.h
+  Only in ./lib: langinfo.h
+  Only in ./lib: limits.h
+  Only in ./lib: locale.h
+  Only in ./lib/malloc: dynarray-skeleton.gl.h
+  Only in ./lib/malloc: dynarray.gl.h
+  Files ./lib/mbtowc-lock.c and ../orig/grep-3.8/lib/mbtowc-lock.c differ
+  Files ./lib/mbtowc-lock.h and ../orig/grep-3.8/lib/mbtowc-lock.h differ
+  Only in ./lib: signal.h
+  Only in ./lib: sigsegv.h
+  Only in ./lib: stdalign.h
+  Only in ./lib: stddef.h
+  Only in ./lib: stdint.h
+  Only in ./lib: stdio.h
+  Only in ./lib: stdlib.h
+  Only in ./lib: string.h
+  Only in ./lib: sys
+  Only in ./lib: time.h
+  Only in ./lib: unistd.h
+  Only in ./lib: unistr.h
+  Only in ./lib: unitypes.h
+  Only in ./lib: uniwidth.h
+  Only in ./lib: wchar.h
+  Only in ./lib: wctype.h
+  Only in .: make.bat
+  Files ./src/grep.c and ../orig/grep-3.8/src/grep.c differ
+
+6) edit make.bat
+
+  cp make.bat make.bat.old
+  sed -i -n 's/^.* cl /cl /p;/^lib /p;/^link /p' make.bat
+  sed -i '/.nologo /s@/lib@\\lib@g' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..       -c/s@-Fo@&lib\\@' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..       /s@.cygpath -w .@lib\\@' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..       /s@.if test -f.*\./@lib\\@' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..  -I/s@.cygpath -w .@src\\@' make.bat
+  sed -i 's@.; fi`@@;s@.`@@' make.bat
+  sed -i 's@malloc/@malloc\\@;s@glthread/@glthread\\@;s@unistr/@unistr\\@;s@uniwidth/@uniwidth\\@' make.bat
+  sed -i '/libgreputils_a/s@-Fo@&lib\\@' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..  -I...lib -I...lib    /s@-Fo@&src\\@' make.bat
+  sed -i '/-DHAVE_CONFIG_H -I. -I..  -I...lib -I...lib    /s@\([^ ]\)/@\1\\@g' make.bat
+  sed -i 's@-DHAVE_CONFIG_H -I. -I..  -I..\\lib -I..\\lib @/I. /I.\\lib @' make.bat
+  sed -i 's@-DHAVE_CONFIG_H -I. -I.. .* -c@/I. /I.\\lib -c@' make.bat
+  sed -i 's@/I..\\..\\@/I..\\@' make.bat
+  sed -i 's@-c -nologo -Fo@/Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /c /nologo /Fo@' make.bat
+  sed -i '/^lib/s@ .nologo .OUT:@@;/^lib/s@  *$@@g;/^lib/s@[^ ]*.obj@.\\lib\\&@g;s@^lib@lib /LTCG /nologo /OUT:@' make.bat
+  sed -i '/^link/s@..\\lib\\libgreputils.a@*@g;/^link/s@\*.*\*@*@;/^link/s@\*@.\\libgreputils.a@' make.bat
+  sed -i '/^link/s@\.\./\.\./@..\\@;s@\([^ ]\)/@\1\\@g' make.bat
+  sed -i '/^link/s@ .OUT:@ /LTCG&@;/^link/s@  *$@@g;/^link/s@[^ ]*.obj@.\\src\\&@g' make.bat
+  sed -i 's@.*@& || exit /b 1@' make.bat
+  rm make.bat.old
+
+7) finally, create a patch:
+  diff -Naur ../orig/grep-3.8 . > ../grep-3.8-build-VS22-x64.patch
+
+ --tip: for the 32-bit build, use different patch name:
+  diff -Naur ../orig/grep-3.8 . > ../grep-3.8-build-VS22-x86.patch

@@ -1,5 +1,5 @@
 # grep-windows
-Instructions for building [Gnu Grep](https://www.gnu.org/software/grep) and [pcre2grep](https://github.com/PCRE2Project/pcre2) as a native windows applications
+Instructions for building [Gnu Grep](https://www.gnu.org/software/grep) and [pcre2grep](https://github.com/PCRE2Project/pcre2) as native windows applications
 
 All patches under the same license as sources of [Gnu Grep](https://www.gnu.org/software/grep): [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) or later
 

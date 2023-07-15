@@ -1,0 +1,24 @@
+diff -Naur grep-3.11/lib/fts.c  grep-3.11/lib/fts-patched.c
+--- grep-3.11/lib/fts.c 2023-04-07 07:10:29.000000000 +0300
++++ grep-3.11/lib/fts-patched.c 2023-07-13 13:21:27.884403300 +0300
+@@ -1867,7 +1867,7 @@
+         FTSENT *dummy;
+         int (*compare) (void const *, void const *) =
+           ((sizeof &dummy == sizeof (void *)
+-            && (long int) &dummy == (long int) (void *) &dummy)
++            && (long long int) &dummy == (long long int) (void *) &dummy)
+            ? (int (*) (void const *, void const *)) sp->fts_compar
+            : fts_compar);
+
+diff -Naur grep-3.11/src/grep.c  grep-3.11/src/grep-patched.c
+--- grep-3.11/src/grep.c        2023-04-11 03:20:47.000000000 +0300
++++ grep-3.11/src/grep-patched.c        2023-07-13 13:24:46.525058300 +0300
+@@ -2830,6 +2830,7 @@
+                    (char *) NULL);
+       puts (_("Written by Mike Haertel and others; see\n"
+               "<https://git.savannah.gnu.org/cgit/grep.git/tree/AUTHORS>."));
++      puts (_("Patched by: Michael M. Builov <mbuilov@yandex.ru>."));
+ #if HAVE_LIBPCRE
+       Pprint_version ();
+ #endif
+

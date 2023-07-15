@@ -1,0 +1,46 @@
+Instructions how to build native pcre2 libraries and pcre2grep.exe utility with Microsoft Visual Studio (or Build Tools for Visual Studio) and WDK10.
+
+From CYGWIN shell:
+
+1) get archive:
+  wget https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.42.tar.gz
+
+2) unpack archive:
+  tar xf pcre2-10.42.tar.gz
+
+3) go to PCRE2 sources:
+  cd pcre2-pcre2-10.42
+
+4) copy files
+  cp ../pcre2/NMakefile-pcre2-10.42       ./NMakefile
+  cp ../pcre2/config-pcre2-10.42.h        ./src/config.h
+  cp ../pcre2/RunGrepTest-pcre2-10.42.bat ./RunGrepTest.bat
+  cp ../pcre2/RunTest-pcre2-10.42.bat     ./RunTest.bat
+  cp ../pcre2/testrepl.c                  ./testrepl.c
+  cp ./src/pcre2.h.generic                ./src/pcre2.h
+  cp ./src/pcre2_chartables.c.dist        ./src/pcre2_chartables.c
+
+5) patch the sources
+  patch -Np1 -i ../pcre2/pcre2-pcre2-10.42.patch
+
+6) now start dos prompt with minimal environment (inherit TMP variable value):
+  env -i TMP="$(cmd.exe /c set TMP | sed 's/.*=//;s/\x0d//')" $(which cmd.exe) /c start cmd.exe
+
+In the dos window:
+
+7) prepare environment, change console code page to ACP (Ansi Code Page):
+  set "PATH=C:\Windows\System32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0"
+  set LC_CTYPE=
+  chcp 1251
+  set VSCMD_SKIP_SENDTELEMETRY=1
+
+  (ACP value can be queried by the command: "reg query HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage /v ACP")
+
+8) setup compiler:
+  "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  (if Microsoft Build Tools for Visual Studio 2022 is installed in "C:\Program Files (x86)")
+
+  --tip: to build 32-bit version of PCRE2 library and pcre2grep.exe utility, specify "x86" instead of "amd64"
+
+9) build pcre2.a, pcre2posix.a and pcre2grep.exe, run tests:
+  nmake -f NMakefile check

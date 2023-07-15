@@ -1,0 +1,156 @@
+LIBPCRE2      = pcre2.a
+LIBPCRE2POSIX = pcre2posix.a
+PCRE2GREP     = pcre2grep.exe
+
+CC      = cl
+CFLAGS  = /Wall /wd4820 /wd4711 /wd4710 /wd5045 /DNDEBUG /I. /Ox /GF /Gy /GS- /GL /EHsc /DHAVE_CONFIG_H /DPCRE2_CODE_UNIT_WIDTH=8 /nologo
+SUBSYSTEM = /SUBSYSTEM:CONSOLE
+
+!IF "$(PLATFORM)" == "x86"
+CFLAGS    = $(CFLAGS) /D_WIN32_WINNT=0x501
+SUBSYSTEM = $(SUBSYSTEM),5.01
+!ELSE
+!IF "$(PLATFORM)" != "x64"
+!ERROR Unknown Platform: "$(PLATFORM)"!
+!ENDIF
+!ENDIF
+
+CCFLAGS = $(CFLAGS) /c /Fo
+
+AR      = lib.exe /LTCG
+ARFLAGS = /out:
+
+TEST1       = pcre2test.exe
+TEST2       = pcre2_jit_test.exe
+TEST3       = pcre2posix_test.exe
+TLINK1      = $(CFLAGS) /wd4996 /Fe$(TEST1) /link /LTCG $(SUBSYSTEM)
+TLINK2      = $(CFLAGS) /wd4996 /Fe$(TEST2) /link /LTCG $(SUBSYSTEM)
+TLINK3      = $(CFLAGS) /wd4996 /Fe$(TEST3) /link /LTCG $(SUBSYSTEM)
+
+UTIL        = testrepl.exe
+ULINK       = $(CFLAGS) /Fe$(UTIL) /link /LTCG $(SUBSYSTEM)
+
+PCRE2_TEST_RUN     = cmd /c RunTest.bat
+PCRE2GREP_TEST_RUN = cmd /c RunGrepTest.bat
+TEST_OK            = echo.All OK
+
+PCRE2GREP_LINK = $(CFLAGS) /wd4996 /Fe$(PCRE2GREP) /link /LTCG $(SUBSYSTEM)
+
+CLEAN = del /q src\*.obj $(LIBPCRE2) $(LIBPCRE2POSIX) $(PCRE2GREP) $(TEST1) $(TEST2) $(TEST3) $(UTIL) *.obj *.ilk *.pdb 2>NUL
+
+all: $(LIBPCRE2) $(LIBPCRE2POSIX) $(PCRE2GREP)
+
+src\pcre2_auto_possess.obj                       : src\pcre2_auto_possess.c
+	$(CC) src\pcre2_auto_possess.c       $(CCFLAGS)src\pcre2_auto_possess.obj
+src\pcre2_chartables.obj                         : src\pcre2_chartables.c
+	$(CC) src\pcre2_chartables.c         $(CCFLAGS)src\pcre2_chartables.obj
+src\pcre2_compile.obj                            : src\pcre2_compile.c
+	$(CC) src\pcre2_compile.c            $(CCFLAGS)src\pcre2_compile.obj
+src\pcre2_config.obj                             : src\pcre2_config.c
+	$(CC) src\pcre2_config.c             $(CCFLAGS)src\pcre2_config.obj
+src\pcre2_context.obj                            : src\pcre2_context.c
+	$(CC) src\pcre2_context.c            $(CCFLAGS)src\pcre2_context.obj
+src\pcre2_convert.obj                            : src\pcre2_convert.c
+	$(CC) src\pcre2_convert.c            $(CCFLAGS)src\pcre2_convert.obj
+src\pcre2_dfa_match.obj                          : src\pcre2_dfa_match.c
+	$(CC) src\pcre2_dfa_match.c          $(CCFLAGS)src\pcre2_dfa_match.obj
+src\pcre2_error.obj                              : src\pcre2_error.c
+	$(CC) src\pcre2_error.c              $(CCFLAGS)src\pcre2_error.obj
+src\pcre2_extuni.obj                             : src\pcre2_extuni.c
+	$(CC) src\pcre2_extuni.c             $(CCFLAGS)src\pcre2_extuni.obj
+src\pcre2_find_bracket.obj                       : src\pcre2_find_bracket.c
+	$(CC) src\pcre2_find_bracket.c       $(CCFLAGS)src\pcre2_find_bracket.obj
+src\pcre2_jit_compile.obj                        : src\pcre2_jit_compile.c
+	$(CC) src\pcre2_jit_compile.c        $(CCFLAGS)src\pcre2_jit_compile.obj
+src\pcre2_maketables.obj                         : src\pcre2_maketables.c
+	$(CC) src\pcre2_maketables.c         $(CCFLAGS)src\pcre2_maketables.obj
+src\pcre2_match.obj                              : src\pcre2_match.c
+	$(CC) src\pcre2_match.c              $(CCFLAGS)src\pcre2_match.obj
+src\pcre2_match_data.obj                         : src\pcre2_match_data.c
+	$(CC) src\pcre2_match_data.c         $(CCFLAGS)src\pcre2_match_data.obj
+src\pcre2_newline.obj                            : src\pcre2_newline.c
+	$(CC) src\pcre2_newline.c            $(CCFLAGS)src\pcre2_newline.obj
+src\pcre2_ord2utf.obj                            : src\pcre2_ord2utf.c
+	$(CC) src\pcre2_ord2utf.c            $(CCFLAGS)src\pcre2_ord2utf.obj
+src\pcre2_pattern_info.obj                       : src\pcre2_pattern_info.c
+	$(CC) src\pcre2_pattern_info.c       $(CCFLAGS)src\pcre2_pattern_info.obj
+src\pcre2_script_run.obj                         : src\pcre2_script_run.c
+	$(CC) src\pcre2_script_run.c         $(CCFLAGS)src\pcre2_script_run.obj
+src\pcre2_serialize.obj                          : src\pcre2_serialize.c
+	$(CC) src\pcre2_serialize.c          $(CCFLAGS)src\pcre2_serialize.obj
+src\pcre2_string_utils.obj                       : src\pcre2_string_utils.c
+	$(CC) src\pcre2_string_utils.c       $(CCFLAGS)src\pcre2_string_utils.obj
+src\pcre2_study.obj                              : src\pcre2_study.c
+	$(CC) src\pcre2_study.c              $(CCFLAGS)src\pcre2_study.obj
+src\pcre2_substitute.obj                         : src\pcre2_substitute.c
+	$(CC) src\pcre2_substitute.c         $(CCFLAGS)src\pcre2_substitute.obj
+src\pcre2_substring.obj                          : src\pcre2_substring.c
+	$(CC) src\pcre2_substring.c          $(CCFLAGS)src\pcre2_substring.obj
+src\pcre2_tables.obj                             : src\pcre2_tables.c
+	$(CC) src\pcre2_tables.c             $(CCFLAGS)src\pcre2_tables.obj
+src\pcre2_ucd.obj                                : src\pcre2_ucd.c
+	$(CC) src\pcre2_ucd.c                $(CCFLAGS)src\pcre2_ucd.obj
+src\pcre2_valid_utf.obj                          : src\pcre2_valid_utf.c
+	$(CC) src\pcre2_valid_utf.c          $(CCFLAGS)src\pcre2_valid_utf.obj
+src\pcre2_xclass.obj                             : src\pcre2_xclass.c
+	$(CC) src\pcre2_xclass.c             $(CCFLAGS)src\pcre2_xclass.obj
+src\pcre2posix.obj                               : src\pcre2posix.c
+	$(CC) src\pcre2posix.c               $(CCFLAGS)src\pcre2posix.obj
+
+OBJS = \
+    src\pcre2_auto_possess.obj \
+    src\pcre2_chartables.obj   \
+    src\pcre2_compile.obj      \
+    src\pcre2_config.obj       \
+    src\pcre2_context.obj      \
+    src\pcre2_convert.obj      \
+    src\pcre2_dfa_match.obj    \
+    src\pcre2_error.obj        \
+    src\pcre2_extuni.obj       \
+    src\pcre2_find_bracket.obj \
+    src\pcre2_jit_compile.obj  \
+    src\pcre2_maketables.obj   \
+    src\pcre2_match.obj        \
+    src\pcre2_match_data.obj   \
+    src\pcre2_newline.obj      \
+    src\pcre2_ord2utf.obj      \
+    src\pcre2_pattern_info.obj \
+    src\pcre2_script_run.obj   \
+    src\pcre2_serialize.obj    \
+    src\pcre2_string_utils.obj \
+    src\pcre2_study.obj        \
+    src\pcre2_substitute.obj   \
+    src\pcre2_substring.obj    \
+    src\pcre2_tables.obj       \
+    src\pcre2_ucd.obj          \
+    src\pcre2_valid_utf.obj    \
+    src\pcre2_xclass.obj
+
+$(LIBPCRE2): $(OBJS)
+	$(AR) $(ARFLAGS)$(LIBPCRE2) $(OBJS)
+
+$(LIBPCRE2POSIX): src\pcre2posix.obj
+	$(AR) $(ARFLAGS)$(LIBPCRE2POSIX) src\pcre2posix.obj
+
+$(PCRE2GREP): src\pcre2grep.c $(LIBPCRE2)
+	$(CC) src\pcre2grep.c $(PCRE2GREP_LINK) $(LIBPCRE2)
+
+$(TEST1): src\pcre2test.c $(LIBPCRE2POSIX) $(LIBPCRE2)
+	$(CC) src\pcre2test.c $(TLINK1) $(LIBPCRE2POSIX) $(LIBPCRE2)
+
+$(TEST2): src\pcre2_jit_test.c $(LIBPCRE2POSIX) $(LIBPCRE2)
+	$(CC) src\pcre2_jit_test.c $(TLINK2) $(LIBPCRE2POSIX) $(LIBPCRE2)
+
+$(TEST3): src\pcre2posix_test.c $(LIBPCRE2POSIX) $(LIBPCRE2)
+	$(CC) /DPCRE2_STATIC /Isrc src\pcre2posix_test.c $(TLINK3) $(LIBPCRE2POSIX) $(LIBPCRE2)
+
+$(UTIL): testrepl.c
+	$(CC) testrepl.c $(ULINK)
+
+check: $(TEST1) $(TEST2) $(TEST3) $(UTIL) $(PCRE2GREP)
+	$(PCRE2_TEST_RUN)
+	$(PCRE2GREP_TEST_RUN)
+	$(TEST_OK)
+
+clean:
+	$(CLEAN)

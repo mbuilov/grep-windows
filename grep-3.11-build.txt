@@ -21,6 +21,8 @@ From CYGWIN shell or other unix-like shell:
                         sed -i '/Visual Studio/s@.:.*include@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p')"'@' ./build.patch
                         sed -i '/Windows Kits/s@.:.*ucrt@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p')"'@'                             ./build.patch
 9) patch grep:          patch -Np1 -i ./build.patch
-10) exit sh:            exit
-11) do compile:         make.bat
-12) check build result: grep.exe --version
+10) optionally, add support for inline utf16->utf8 transcoding:
+                        patch -Np1 -i ../grep-3.11-utf16.patch
+11) exit sh:            exit
+12) do compile:         make.bat
+13) check build result: grep.exe --version

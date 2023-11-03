@@ -1,0 +1,590 @@
+--- grep-3.11/src/grep.c	2023-11-03 15:48:03.330501300 +0300
++++ grep-3.11/src/grep.c	2023-11-03 15:48:02.897786300 +0300
+@@ -479,6 +479,15 @@
+     stdout_errno = errno;
+ }
+ 
++#if defined _WIN32 && ! defined __CYGWIN__
++
++#define READ_UTF16_AUTO 1
++#define READ_UTF16_BE   2
++#define READ_UTF16_LE   3
++static int read_utf16 = 0;
++
++#endif
++
+ static struct exclude *excluded_patterns[2];
+ static struct exclude *excluded_directory_patterns[2];
+ /* Short options.  */
+@@ -551,6 +560,11 @@
+   {"text", no_argument, NULL, 'a'},
+   {"binary", no_argument, NULL, 'U'},
+   {"unix-byte-offsets", no_argument, NULL, 'u'},
++#if defined _WIN32 && ! defined __CYGWIN__
++  {"utf16", no_argument, &read_utf16, READ_UTF16_AUTO},
++  {"utf16-be", no_argument, &read_utf16, READ_UTF16_BE},
++  {"utf16-le", no_argument, &read_utf16, READ_UTF16_LE},
++#endif
+   {"version", no_argument, NULL, 'V'},
+   {"with-filename", no_argument, NULL, 'H'},
+   {"word-regexp", no_argument, NULL, 'w'},
+@@ -793,7 +807,7 @@
+ file_must_have_nulls (idx_t size, int fd, struct stat const *st)
+ {
+   /* If the file has holes, it must contain a null byte somewhere.  */
+-  if (SEEK_HOLE != SEEK_SET && !seek_failed
++  if (fd != -333 && SEEK_HOLE != SEEK_SET && !seek_failed
+       && usable_st_size (st) && size < st->st_size)
+     {
+       off_t cur = size;
+@@ -921,7 +935,7 @@
+   bufbeg = buflim = ALIGN_TO (buffer + 1, pagesize);
+   bufbeg[-1] = eolbyte;
+   bufdesc = fd;
+-  bufoffset = fd == STDIN_FILENO ? lseek (fd, 0, SEEK_CUR) : 0;
++  bufoffset = fd != -333 && fd == STDIN_FILENO ? lseek (fd, 0, SEEK_CUR) : 0;
+   seek_failed = bufoffset < 0;
+ 
+   /* Assume SEEK_DATA fails if SEEK_CUR does.  */
+@@ -939,6 +953,10 @@
+   return true;
+ }
+ 
++#if defined _WIN32 && ! defined __CYGWIN__
++static size_t utf16_to_utf8 (void *buf, size_t count);
++#endif
++
+ /* Read new stuff into the buffer, saving the specified
+    amount of old stuff.  When we're done, 'bufbeg' points
+    to the beginning of the buffer contents, and 'buflim'
+@@ -977,7 +995,7 @@
+              heuristic if we've already read past the file end, as most
+              likely the file is growing.  */
+           ptrdiff_t alloc_max = -1;
+-          if (usable_st_size (st))
++          if (bufdesc != -333 && usable_st_size (st))
+             {
+               off_t to_be_read = st->st_size - bufoffset;
+               ptrdiff_t a;
+@@ -1011,7 +1029,11 @@
+ 
+   while (true)
+     {
+-      fillsize = safe_read (bufdesc, readbuf, readsize);
++      fillsize =
++#if defined _WIN32 && ! defined __CYGWIN__
++        bufdesc == -333 ? utf16_to_utf8 (readbuf, readsize) :
++#endif
++        safe_read (bufdesc, readbuf, readsize);
+       if (fillsize == SAFE_READ_ERROR)
+         {
+           fillsize = 0;
+@@ -1023,7 +1045,7 @@
+         break;
+       totalnl = add_count (totalnl, fillsize);
+ 
+-      if (SEEK_DATA != SEEK_SET && !seek_data_failed)
++      if (bufdesc != -333 && SEEK_DATA != SEEK_SET && !seek_data_failed)
+         {
+           /* Solaris SEEK_DATA fails with errno == ENXIO in a hole at EOF.  */
+           off_t data_start = lseek (bufdesc, bufoffset, SEEK_DATA);
+@@ -1542,7 +1564,7 @@
+   if (align_tabs)
+     {
+       /* Width is log of maximum number.  Line numbers are origin-1.  */
+-      intmax_t num = usable_st_size (st) ? st->st_size : INTMAX_MAX;
++      intmax_t num = fd != -333 && usable_st_size (st) ? st->st_size : INTMAX_MAX;
+       num += out_line && num < INTMAX_MAX;
+       do
+         offset_width++;
+@@ -1748,20 +1770,393 @@
+   return false;
+ }
+ 
++#if defined _WIN32 && ! defined __CYGWIN__
++
++static HANDLE h_file = NULL;
++static HANDLE h_mapping = NULL;
++static const void *mapped_addr = NULL;
++static const void *mapped_end = NULL;
++
++static int try_map_file (const char *filename)
++{
++  if (INVALID_HANDLE_VALUE != (h_file = CreateFile (
++      /*lpFileName:*/filename,
++      /*dwDesiredAccess:*/GENERIC_READ,
++      /*dwShareMode:*/FILE_SHARE_READ,
++      /*lpSecurityAttributes:*/NULL,
++      /*dwCreationDisposition:*/OPEN_EXISTING,
++      /*dwFlagsAndAttributes:*/FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
++      /*hTemplateFile:*/NULL)))
++    {
++      LARGE_INTEGER sz;
++      const DWORD type = GetFileType (h_file);
++      if (FILE_TYPE_DISK == type && GetFileSizeEx (h_file, &sz))
++        {
++          if (0 == sz.QuadPart)
++            {
++              CloseHandle (h_file);
++              mapped_addr = mapped_end = "";
++              return 0; /* ok, empty file */
++            }
++          if ((unsigned long long) sz.QuadPart - 1 >= (size_t) -1)
++            {
++              CloseHandle (h_file);
++              return -2; /* too big file */
++            }
++          if (NULL != (h_mapping = CreateFileMapping (
++              /*hFile:*/h_file,
++              /*lpAttributes:*/NULL,
++              /*flProtect:*/PAGE_READONLY,
++              /*dwMaximumSizeHigh:*/0/*map whole file*/,
++              /*dwMaximumSizeLow:*/0/*map whole file*/,
++              /*lpName:*/NULL/*do not name the mapping*/)))
++            {
++              if (NULL != (mapped_addr = MapViewOfFile (
++                  /*hFileMappingObject:*/h_mapping,
++                  /*dwDesiredAccess:*/FILE_MAP_READ,
++                  /*dwFileOffsetHigh:*/0/*read from the beginning*/,
++                  /*dwFileOffsetLow:*/0/*read from the beginning*/,
++                  /*dwNumberOfBytesToMap:*/0/*use whole mapping*/)))
++                {
++                  mapped_end = (const char*) mapped_addr +
++                    (size_t) (unsigned long long) sz.QuadPart;
++                  return 0; /* success */
++                }
++              CloseHandle (h_mapping);
++            }
++        }
++      CloseHandle (h_file);
++    }
++  return -1; /* failure */
++}
++
++static void close_mapping (void)
++{
++  if (mapped_addr != mapped_end)
++    {
++      CloseHandle (h_mapping);
++      CloseHandle (h_file);
++    }
++  mapped_addr = NULL;
++  mapped_end = NULL;
++}
++
++static int check_utf16_bom (const unsigned char s[2])
++{
++  if (0xFE == s[0] && 0xFF == s[1])
++    {
++      if (READ_UTF16_LE == read_utf16)
++        return -1;
++      return READ_UTF16_BE;
++    }
++  if (0xFF == s[0] && 0xFE == s[1])
++    {
++      if (READ_UTF16_BE == read_utf16)
++        return -1;
++      return READ_UTF16_LE;
++    }
++  return 0;
++}
++
++#define UTF8_MAX_LEN 4
++typedef unsigned char utf8_char_t;
++typedef unsigned short utf16_char_t;
++typedef unsigned int uint32_least_t;
++
++static unsigned utf16_to_utf8_one (utf8_char_t d[UTF8_MAX_LEN],
++  const utf16_char_t w, const utf16_char_t *const s,
++  const utf16_char_t *const se)
++{
++  uint32_least_t n, c = w;
++  if (c >= 0x80)
++    {
++      if (c >= 0x800)
++        {
++          if (0xD800 == (c & 0xFC00))
++            {
++              if (s == se)
++                return 0;
++              n = *s;
++              if (0xDC00 != (n & 0xFC00))
++                return 0;
++              c = (n << 10) + c - 0x20DC00 + 0x800000 + 0x10000;
++              n = 4;
++              d[n - 4] = (utf8_char_t) (c >> 18);
++              c = (c & 0x3FFFF) + 0x80000;
++            }
++          else
++            {
++              n = 3;
++              c += 0xE0000;
++            }
++          d[n - 3] = (utf8_char_t) (c >> 12);
++          c = (c & 0xFFF) + 0x2000;
++        }
++      else
++        {
++          n = 2;
++          c += 0x3000;
++        }
++      d[n - 2] = (utf8_char_t) (c >> 6);
++      c = (c & 0x3F) + 0x80;
++    }
++  else
++    n = 1;
++  d[n - 1] = (utf8_char_t) c;
++  return (unsigned) n;
++}
++
++static utf16_char_t utf16_revert (utf16_char_t w)
++{
++  return (utf16_char_t) (0xFFFF & ((w << 8) | (w >> 8)));
++}
++
++static unsigned xutf16_to_utf8_one (utf8_char_t d[UTF8_MAX_LEN],
++  const utf16_char_t w, const utf16_char_t *const s,
++  const utf16_char_t *const se)
++{
++  uint32_least_t n, c = w;
++  if (c >= 0x80)
++    {
++      if (c >= 0x800)
++        {
++          if (0xD800 == (c & 0xFC00))
++            {
++              if (s == se)
++                return 0;
++              n = utf16_revert (*s);
++              if (0xDC00 != (n & 0xFC00))
++                return 0;
++              c = (n << 10) + c - 0x20DC00 + 0x800000 + 0x10000;
++              n = 4;
++              d[n - 4] = (utf8_char_t) (c >> 18);
++              c = (c & 0x3FFFF) + 0x80000;
++            }
++          else
++            {
++              n = 3;
++              c += 0xE0000;
++            }
++          d[n - 3] = (utf8_char_t) (c >> 12);
++          c = (c & 0xFFF) + 0x2000;
++        }
++      else
++        {
++          n = 2;
++          c += 0x3000;
++        }
++      d[n - 2] = (utf8_char_t) (c >> 6);
++      c = (c & 0x3F) + 0x80;
++    }
++  else
++    n = 1;
++  d[n - 1] = (utf8_char_t) c;
++  return (unsigned) n;
++}
++
++static size_t utf16_pos = 0;
++
++static utf8_char_t utf8_buf[UTF8_MAX_LEN];
++static unsigned utf8_offset = 0;
++static unsigned utf8_filled = 0;
++
++static size_t utf16_to_utf8 (void *buf, size_t count)
++{
++  utf8_char_t *d = (utf8_char_t*) buf;
++  utf8_char_t *const de = d + count/sizeof(*d);
++
++  if (de == d)
++    return 0;
++
++  if (utf8_offset < utf8_filled)
++    {
++      const unsigned sz = utf8_filled - utf8_offset;
++      const size_t space = (size_t) (de - d);
++      const unsigned copy = sz <= space ? sz : (unsigned) space;
++      memcpy (d, &utf8_buf[utf8_offset], copy*sizeof (utf8_buf[0]));
++      utf8_offset += copy;
++      if ((d += copy) == de)
++        return (size_t) ((char*) d - (char*) buf); /* full buf is filled */
++    }
++
++  const utf16_char_t *s = (const utf16_char_t*) mapped_addr + utf16_pos;
++
++  for (;;)
++    {
++
++      if (read_utf16 == 1)
++        {
++          while (s < (const utf16_char_t*) mapped_end)
++            {
++              const utf16_char_t x = *s++;
++
++              if (0xFEFF == x)
++                continue; /* skip BOM */
++
++              if (0xFFFE == x)
++                {
++                  read_utf16 = 2; /* from now, revert bytes */
++                  break; /* skip BOM */
++                }
++
++              if (0x0D == x && s < (const utf16_char_t*) mapped_end && 0x0A == *s)
++                continue; /* skip CR of CRLF */
++
++              utf8_char_t *const dst = ((size_t) (de - d) >= UTF8_MAX_LEN) ? d : utf8_buf;
++              const unsigned sz = utf16_to_utf8_one (dst, x, s, (const utf16_char_t*) mapped_end);
++              if (!sz)
++                return SAFE_READ_ERROR; /* (size_t)-1 */
++
++              if (UTF8_MAX_LEN == sz)
++                s++;
++
++              if (dst != d)
++                {
++                  const size_t space = (size_t) (de - d);
++                  const unsigned copy = sz <= space ? sz : (unsigned) space;
++                  memcpy (d, utf8_buf, copy*sizeof (utf8_buf[0]));
++                  if ((d += copy) == de)
++                    {
++                      utf8_filled = sz;
++                      utf8_offset = copy;
++                      break;
++                    }
++                }
++              else if ((d += sz) == de)
++                break;
++            }
++          if (read_utf16 == 1)
++            break;
++        }
++
++      if (read_utf16 != 1)
++        {
++          while (s < (const utf16_char_t*) mapped_end)
++            {
++              const utf16_char_t x = utf16_revert (*s++);
++
++              if (0xFEFF == x)
++                continue; /* skip BOM */
++
++              if (0xFFFE == x)
++                {
++                  read_utf16 = 1; /* from now, do not revert bytes */
++                  break; /* skip BOM */
++                }
++
++              if (0x0D == x && s < (const utf16_char_t*) mapped_end && 0x0A == utf16_revert (*s))
++                continue; /* skip CR of CRLF */
++
++              utf8_char_t *const dst = ((size_t) (de - d) >= UTF8_MAX_LEN) ? d : utf8_buf;
++              const unsigned sz = xutf16_to_utf8_one (dst, x, s, (const utf16_char_t*) mapped_end);
++              if (!sz)
++                return SAFE_READ_ERROR; /* (size_t)-1 */
++
++              if (UTF8_MAX_LEN == sz)
++                s++;
++
++              if (dst != d)
++                {
++                  const size_t space = (size_t) (de - d);
++                  const unsigned copy = sz <= space ? sz : (unsigned) space;
++                  memcpy (d, utf8_buf, copy*sizeof (utf8_buf[0]));
++                  if ((d += copy) == de)
++                    {
++                      utf8_filled = sz;
++                      utf8_offset = copy;
++                      break;
++                    }
++                }
++              else if ((d += sz) == de)
++                break;
++            }
++          if (read_utf16 != 1)
++            break;
++        }
++    }
++
++  utf16_pos = (size_t) (s - (const utf16_char_t*) mapped_addr);
++
++  return (size_t) ((char*) d - (char*) buf);
++}
++
++#endif
++
+ static bool
+ grepfile (int dirdesc, char const *name, bool follow, bool command_line)
+ {
+-  int oflag = (O_RDONLY | O_NOCTTY
+-               | (IGNORE_DUPLICATE_BRANCH_WARNING
+-                  (binary ? O_BINARY : 0))
+-               | (follow ? 0 : O_NOFOLLOW)
+-               | (skip_devices (command_line) ? O_NONBLOCK : 0));
+-  int desc = openat_safer (dirdesc, name, oflag);
+-  if (desc < 0)
++  int desc;
++ 
++#if defined _WIN32 && ! defined __CYGWIN__
++
++  /* try to memory-map file */
++  if (read_utf16)
+     {
+-      if (follow || ! open_symlink_nofollow_error (errno))
+-        suppressible_error (errno);
+-      return true;
++      if (mapped_addr)
++        {
++          error (0, 0, _("%s: error: cannot create one more mapping"), filename);
++          errseen = true;
++          return true;
++        }
++      if (try_map_file (name))
++        {
++          error (0, 0, _("%s: error: cannot create mapping, possibly input file is too big"), filename);
++          errseen = true;
++          return true;
++        }
++      if ((unsigned long long) ((const char*) mapped_end - (const char*) mapped_addr) & 1)
++        {
++          error (0, 0, _("%s: error: size of utf16-encoded file is not even: %llu"),
++                 filename,
++                 (unsigned long long) ((const char*) mapped_end - (const char*) mapped_addr));
++          errseen = true;
++          close_mapping ();
++          return true;
++        }
++      if (mapped_end != mapped_addr)
++        {
++          const unsigned le = 1;
++          const int host_byte_order =
++            *(const unsigned char*)&le ? READ_UTF16_LE : READ_UTF16_BE;
++          const int file_byte_order =
++            check_utf16_bom ((const unsigned char*) mapped_addr);
++
++          if (-1 == file_byte_order)
++            {
++              const char *const file_byte_order_name =
++                READ_UTF16_LE == read_utf16 ? "UTF16-BE" : "UTF16-LE";
++              error (0, 0, _("%s: error: file byte order: %s"), filename,
++                     file_byte_order_name);
++              errseen = true;
++              close_mapping ();
++              return true;
++            }
++
++          if (READ_UTF16_AUTO == read_utf16)
++            read_utf16 = file_byte_order ? file_byte_order : host_byte_order;
++
++          read_utf16 = read_utf16 == host_byte_order ? 1 : 2;
++
++          if (file_byte_order)
++            mapped_addr = (const char*) mapped_addr + 2; /* skip BOM */
++        }
++      desc = -333;
++    }
++  else
++#endif
++    {
++      int oflag = (O_RDONLY | O_NOCTTY
++                   | (IGNORE_DUPLICATE_BRANCH_WARNING
++                      (binary ? O_BINARY : 0))
++                   | (follow ? 0 : O_NOFOLLOW)
++                   | (skip_devices (command_line) ? O_NONBLOCK : 0));
++      desc = openat_safer (dirdesc, name, oflag);
++      if (desc < 0)
++        {
++          if (follow || ! open_symlink_nofollow_error (errno))
++            suppressible_error (errno);
++          return true;
++        }
+     }
+   return grepdesc (desc, command_line);
+ }
+@@ -1801,7 +2196,7 @@
+ static void
+ finalize_input (int fd, struct stat const *st, bool ineof)
+ {
+-  if (fd == STDIN_FILENO
++  if (fd != -333 && fd == STDIN_FILENO
+       && (outleft
+           ? (!ineof
+              && (seek_failed
+@@ -1828,25 +2223,25 @@
+      example, normally DESC is a directory only at the top level, but
+      there is an exception if some other process substitutes a
+      directory for a non-directory while 'grep' is running.  */
+-  if (fstat (desc, &st) != 0)
++  if (desc != -333 ? fstat (desc, &st) != 0 : stat (filename, &st) != 0)
+     {
+       suppressible_error (errno);
+       goto closeout;
+     }
+ 
+-  if (desc != STDIN_FILENO && skip_devices (command_line)
++  if (desc != -333 && desc != STDIN_FILENO && skip_devices (command_line)
+       && is_device_mode (st.st_mode))
+     goto closeout;
+ 
+   if (desc != STDIN_FILENO && command_line
+-      && skipped_file (filename, true, S_ISDIR (st.st_mode) != 0))
++      && skipped_file (filename, true, desc != -333 && S_ISDIR (st.st_mode) != 0))
+     goto closeout;
+ 
+   /* Don't output file names if invoked as 'grep -r PATTERN NONDIRECTORY'.  */
+   if (out_file < 0)
+-    out_file = !!S_ISDIR (st.st_mode);
++    out_file = desc != -333 && !!S_ISDIR (st.st_mode);
+ 
+-  if (desc != STDIN_FILENO
++  if (desc != -333 && desc != STDIN_FILENO
+       && directories == RECURSE_DIRECTORIES && S_ISDIR (st.st_mode))
+     {
+       /* Traverse the directory starting with its full name, because
+@@ -1877,7 +2272,7 @@
+         suppressible_error (errno);
+       return status;
+     }
+-  if (desc != STDIN_FILENO
++  if (desc != -333 && desc != STDIN_FILENO
+       && ((directories == SKIP_DIRECTORIES && S_ISDIR (st.st_mode))
+           || ((devices == SKIP_DEVICES
+                || (devices == READ_COMMAND_LINE_DEVICES && !command_line))
+@@ -1940,9 +2335,16 @@
+     }
+ 
+  closeout:
+-  if (desc != STDIN_FILENO && close (desc) != 0)
+-    suppressible_error (errno);
+-  return status;
++#if defined _WIN32 && ! defined __CYGWIN__
++  if (desc == -333)
++    close_mapping ();
++  else
++#endif
++    {
++      if (desc != STDIN_FILENO && close (desc) != 0)
++        suppressible_error (errno);
++      return status;
++    }
+ }
+ 
+ static bool
+@@ -2058,6 +2460,17 @@
+       --colour[=WHEN]       use markers to highlight the matching strings;\n\
+                             WHEN is 'always', 'never', or 'auto'\n\
+   -U, --binary              do not strip CR characters at EOL (MSDOS/Windows)\n\
++"));
++#if defined _WIN32 && ! defined __CYGWIN__
++      printf (_("\
++      --utf16               transcode input file UTF16 -> UTF8, determine file\n\
++                            byte order using ByteOrderMark (BOM), if no BOM is\n\
++                            present, use host byte order\n\
++      --utf16-be            transcode input file UTF16-BE -> UTF8\n\
++      --utf16-le            transcode input file UTF16-LE -> UTF8\n\
++"));
++#endif
++      printf (_("\
+ \n"));
+       printf (_("\
+ When FILE is '-', read standard input.  With no FILE, read '.' if\n\

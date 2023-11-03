@@ -14,6 +14,9 @@ Author of the patches: Michael M. Builov (mbuilov@yandex.ru)
 ## Changes since windows build of Gnu grep-3.8
 - search in sub-directories (grep -r ...) is now working
 
+## Changes since windows build of Gnu grep-3.11
+- added experimental support for inline UTF16->UTF8 transcoding
+
 ## Pre-built executables:
 - [`grep-3.11-x64.exe`](/grep-3.11-x64.exe) - grep 3.11 built for Windows10 x64
 - [`grep-3.11-x86.exe`](/grep-3.11-x86.exe) - grep 3.11 built for WindowsXP x86

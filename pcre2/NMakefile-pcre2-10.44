@@ -94,6 +94,8 @@ src\pcre2_valid_utf.obj                          : src\pcre2_valid_utf.c
 	$(CC) src\pcre2_valid_utf.c          $(CCFLAGS)src\pcre2_valid_utf.obj
 src\pcre2_xclass.obj                             : src\pcre2_xclass.c
 	$(CC) src\pcre2_xclass.c             $(CCFLAGS)src\pcre2_xclass.obj
+src\pcre2_chkdint.obj                            : src\pcre2_chkdint.c
+	$(CC) src\pcre2_chkdint.c            $(CCFLAGS)src\pcre2_chkdint.obj
 src\pcre2posix.obj                               : src\pcre2posix.c
 	$(CC) src\pcre2posix.c               $(CCFLAGS)src\pcre2posix.obj
 
@@ -124,7 +126,8 @@ OBJS = \
     src\pcre2_tables.obj       \
     src\pcre2_ucd.obj          \
     src\pcre2_valid_utf.obj    \
-    src\pcre2_xclass.obj
+    src\pcre2_xclass.obj       \
+	src\pcre2_chkdint.obj
 
 $(LIBPCRE2): $(OBJS)
 	$(AR) $(ARFLAGS)$(LIBPCRE2) $(OBJS)

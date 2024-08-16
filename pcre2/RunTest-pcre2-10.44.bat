@@ -273,7 +273,131 @@ if errorlevel 1 (
   set failed="yes"
   goto :eof
 ) else if [%1]==[2] (
-  %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -70,-62,-2,-1,0,100,101,191,200 >>%2%bits%\%testoutput%
+  %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -70,-62,-2,-1,0,100,101,191,300 >>%2%bits%\%testoutput%
+)
+
+@rem test etalon data is good for 64-bit pcre2test executable but it is wrong for 32-bit pcre2test
+@rem - due to smaller inner structures (pointers are 32-bit, size_t is also 34-bit)
+@rem don't touch test etalon data, but fix test output instead (increase reported sizes)
+if %1 == 8 (
+  find "Memory allocation - compiled block : 119" %2%bits%\%testoutput% >NUL && (
+ <%2%bits%\%testoutput% .\testrepl.exe +590 35 ^
+ | .\testrepl.exe +591 33 ^
+ | .\testrepl.exe +894 36 ^
+ | .\testrepl.exe +895 31 ^
+ | .\testrepl.exe +1245 35 ^
+ | .\testrepl.exe +1246 39 ^
+ | .\testrepl.exe +1594 37 ^
+ | .\testrepl.exe +1595 37 ^
+ | .\testrepl.exe +1882 34 ^
+ | .\testrepl.exe +1883 33 ^
+ | .\testrepl.exe +2236 34 ^
+ | .\testrepl.exe +2237 35 ^
+ | .\testrepl.exe +2598 34 ^
+ | .\testrepl.exe +2599 35 ^
+ | .\testrepl.exe +2867 34 ^
+ | .\testrepl.exe +2868 35 ^
+ | .\testrepl.exe +3140 34 ^
+ | .\testrepl.exe +3141 39 ^
+ | .\testrepl.exe +3426 35 ^
+ | .\testrepl.exe +3427 34 ^
+ | .\testrepl.exe +3779 35 ^
+ | .\testrepl.exe +3780 36 ^
+ | .\testrepl.exe +4764 36 ^
+ | .\testrepl.exe +4765 32 ^
+ | .\testrepl.exe +5975 35 ^
+ | .\testrepl.exe +5976 32 ^
+ | .\testrepl.exe +6663 35 ^
+ | .\testrepl.exe +6664 38 ^
+ | .\testrepl.exe +6990 36 ^
+ | .\testrepl.exe +6991 34 ^
+ | .\testrepl.exe +7370 32 ^
+ | .\testrepl.exe +7371 30 ^
+ | .\testrepl.exe +7372 30 ^
+ | .\testrepl.exe +7771 39 ^
+ | .\testrepl.exe +7772 33 ^
+ | .\testrepl.exe +8198 37 ^
+ | .\testrepl.exe +8199 34 ^
+ | .\testrepl.exe +8592 36 ^
+ | .\testrepl.exe +8593 37 ^
+ | .\testrepl.exe +8945 38 ^
+ | .\testrepl.exe +8946 39 ^
+ | .\testrepl.exe +9404 34 ^
+ | .\testrepl.exe +9405 36 ^
+ | .\testrepl.exe +9686 34 ^
+ | .\testrepl.exe +9687 37 ^
+ | .\testrepl.exe +9970 34 ^
+ | .\testrepl.exe +9971 38 ^
+ | .\testrepl.exe +10256 34 ^
+ | .\testrepl.exe +10257 38 ^
+ | .\testrepl.exe +10543 34 ^
+ | .\testrepl.exe +10544 38 ^
+ | .\testrepl.exe +10932 34 ^
+ | .\testrepl.exe +10933 36 ^
+ | .\testrepl.exe +11214 34 ^
+ | .\testrepl.exe +11215 36 ^
+ | .\testrepl.exe +11492 34 ^
+ | .\testrepl.exe +11493 36 ^
+ | .\testrepl.exe +11769 34 ^
+ | .\testrepl.exe +11770 36 ^
+ | .\testrepl.exe +12076 35 ^
+ | .\testrepl.exe +12077 34 ^
+ | .\testrepl.exe +12497 35 ^
+ | .\testrepl.exe +12498 35 ^
+ | .\testrepl.exe +12927 35 ^
+ | .\testrepl.exe +12928 35 ^
+ | .\testrepl.exe +13340 34 ^
+ | .\testrepl.exe +13341 36 ^
+ | .\testrepl.exe +13624 38 ^
+ | .\testrepl.exe +13625 33 ^
+ | .\testrepl.exe +13925 35 ^
+ | .\testrepl.exe +13926 34 ^
+ | .\testrepl.exe +14235 35 ^
+ | .\testrepl.exe +14236 34 ^
+ | .\testrepl.exe +14629 35 ^
+ | .\testrepl.exe +14630 31 ^
+ | .\testrepl.exe +14908 35 ^
+ | .\testrepl.exe +14909 31 ^
+ | .\testrepl.exe +15186 35 ^
+ | .\testrepl.exe +15187 31 ^
+ | .\testrepl.exe +15465 35 ^
+ | .\testrepl.exe +15466 31 ^
+ | .\testrepl.exe +15757 38 ^
+ | .\testrepl.exe +15758 36 ^
+ | .\testrepl.exe +16049 35 ^
+ | .\testrepl.exe +16050 31 ^
+ | .\testrepl.exe +16335 38 ^
+ | .\testrepl.exe +16336 34 ^
+ | .\testrepl.exe +16650 36 ^
+ | .\testrepl.exe +16651 31 ^
+ | .\testrepl.exe +16983 36 ^
+ | .\testrepl.exe +16984 31 ^
+ | .\testrepl.exe +17302 35 ^
+ | .\testrepl.exe +17303 33 ^
+ | .\testrepl.exe +17603 37 ^
+ | .\testrepl.exe +17604 34 ^
+ | .\testrepl.exe +18014 36 ^
+ | .\testrepl.exe +18015 36 ^
+ | .\testrepl.exe +18384 34 ^
+ | .\testrepl.exe +18385 35 ^
+ | .\testrepl.exe +18654 34 ^
+ | .\testrepl.exe +18655 35 ^
+ | .\testrepl.exe +18924 34 ^
+ | .\testrepl.exe +18925 35 ^
+ | .\testrepl.exe +19202 34 ^
+ | .\testrepl.exe +19203 36 ^
+ | .\testrepl.exe +19476 34 ^
+ | .\testrepl.exe +19477 35 ^
+ | .\testrepl.exe +19750 34 ^
+ | .\testrepl.exe +19751 35 ^
+ | .\testrepl.exe +20024 34 ^
+ | .\testrepl.exe +20025 35 ^
+ | .\testrepl.exe +20306 34 ^
+ | .\testrepl.exe +20307 36 ^
+ >%2%bits%\%testoutput%.x
+  del /q %2%bits%\%testoutput%
+  ren %2%bits%\%testoutput%.x %testoutput%
+  )
 )
 
 set type=

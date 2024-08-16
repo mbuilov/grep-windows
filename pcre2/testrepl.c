@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #define HANDLE int
 #endif /* !_WIN32 */
 
@@ -114,8 +115,16 @@ static int print_usage(const char *prog)
 #define STR3 "or\n"
 	write_buf(h, STR3, sizeof(STR3) - 1);
 	write_buf(h, prog, len);
-#define STR4 " b1\nwhere: b1 - bytes to delete, e.g.: 0d\n"
+#define STR4 " b\nwhere: b - bytes to delete, e.g.: 0d\n"
 	write_buf(h, STR4, sizeof(STR4) - 1);
+	write_buf(h, STR3, sizeof(STR3) - 1);
+	write_buf(h, prog, len);
+#define STR5 " +offset b\nwhere: offset - offset (non-negative decimal number) from the input beginning where to replace source byte with b\n"
+	write_buf(h, STR5, sizeof(STR5) - 1);
+	write_buf(h, STR3, sizeof(STR3) - 1);
+	write_buf(h, prog, len);
+#define STR6 " +offset\nwhere: offset - offset (non-negative decimal number) from the input beginning where to delete source byte\n"
+	write_buf(h, STR6, sizeof(STR6) - 1);
 	return 1;
 }
 
@@ -139,12 +148,14 @@ static char *print_inum(char *end, int i)
 }
 #endif
 
+#ifdef _WIN32
 static void write_num(HANDLE h, const unsigned n)
 {
 	char num_buf[64];
 	char *const num = print_num(&num_buf[sizeof(num_buf)], n);
 	write_buf(h, num, (size_t)(&num_buf[sizeof(num_buf)] - num));
 }
+#endif
 
 #ifndef _WIN32
 static void write_inum(HANDLE h, const int i)
@@ -193,7 +204,7 @@ static int write_error(void)
 	return 4;
 }
 
-static int translate(const int repl, const unsigned char b1, const unsigned char b2)
+static int translate(const unsigned long long offs, const int repl, const unsigned char b1, const unsigned char b2)
 {
 #ifdef _WIN32
 	HANDLE rh = GetStdHandle(STD_INPUT_HANDLE);
@@ -203,29 +214,49 @@ static int translate(const int repl, const unsigned char b1, const unsigned char
 	int wh = fileno(stdout);
 #endif
 	unsigned char buf[STACK_BUF_SIZE];
+	unsigned long long pos = 0;
 	for (;;) {
 		int r = read_buf(rh, buf, sizeof(buf));
 		if (r < 0)
 			return read_error();
 		if (r == 0)
 			return 0;
-		if (repl) {
-			int i = 0;
-			do {
-				if (b1 == buf[i])
-					buf[i] = b2;
-			} while (++i != r);
+		if ((unsigned long long)-1 == offs) {
+			if (repl) {
+				int i = 0;
+				do {
+					if (b1 == buf[i])
+						buf[i] = b2;
+				} while (++i != r);
+			}
+			else {
+				int i = 0, at = 0;
+				do {
+					if (b1 != buf[i]) {
+						if (at != i)
+							buf[at] = buf[i];
+						at++;
+					}
+				} while (++i != r);
+				r = at;
+			}
 		}
 		else {
-			int i = 0, at = 0;
-			do {
-				if (b1 != buf[i]) {
-					if (at != i)
-						buf[at] = buf[i];
-					at++;
+			const unsigned len = (unsigned)r;
+			if (pos <= offs && len > offs - pos) {
+				if (repl)
+					buf[offs - pos] = b2;
+				else {
+					unsigned i = (unsigned)(offs - pos);
+					while (++i < len)
+						buf[i - 1] = buf[i];
+					r--;
 				}
-			} while (++i != r);
-			r = at;
+			}
+			if (len <= (unsigned long long)-1 - pos)
+				pos += len;
+			else
+				pos = (unsigned long long)-1;
 		}
 		if (write_buf(wh, buf, (unsigned)r) < 0)
 			return write_error();
@@ -267,15 +298,61 @@ static int parse_byte(const char *const a)
 	return -1;
 }
 
+static unsigned long long parse_offs(const char *const a)
+{
+	if ('0' <= *a && *a <= '9') {
+		unsigned long long offs = (unsigned)(*a - '0');
+		const char *c = a;
+		for (;;) {
+			if (!*++c)
+				return offs;
+			if (*c < '0' || '9' < *c)
+				break;
+			if (offs > (unsigned long long)-1/10 ||
+				(unsigned)(*c - '0') >= (unsigned long long)-1 - offs*10)
+			{
+				HANDLE h = get_stderr_handle();
+				const size_t byte_len = strlen(a);
+#define PARSE_ERR3 "too big offset: \""
+				write_buf(h, PARSE_ERR3, sizeof(PARSE_ERR3) - 1);
+				write_buf(h, a, byte_len);
+#define PARSE_ERR4 "\"\n"
+				write_buf(h, PARSE_ERR4, sizeof(PARSE_ERR4) - 1);
+				return (unsigned long long)-1;
+			}
+			offs = offs*10 + (unsigned)(*c - '0');
+		}
+	}
+	{
+		HANDLE h = get_stderr_handle();
+		if (!*a) {
+#define PARSE_ERR5 "empty offset\n"
+			write_buf(h, PARSE_ERR5, sizeof(PARSE_ERR5) - 1);
+		}
+		else {
+			const size_t byte_len = strlen(a);
+#define PARSE_ERR6 "failed to parse offset: \""
+			write_buf(h, PARSE_ERR6, sizeof(PARSE_ERR6) - 1);
+			write_buf(h, a, byte_len);
+#define PARSE_ERR7 "\", expecting non-negative decimal number, e.g.: 012345678\n"
+			write_buf(h, PARSE_ERR7, sizeof(PARSE_ERR7) - 1);
+		}
+	}
+	return (unsigned long long)-1;
+}
+
 int main(int argc, char *argv[])
 {
-	int b1, b2 = 0;
+	int b1 = 0, b2 = 0;
+	unsigned long long offs = (unsigned long long)-1;
 	if (argc != 2 && argc != 3)
 		return print_usage(argv[0]);
-	if ((b1 = parse_byte(argv[1])) < 0 ||
+	if ((('+' == argv[1][0]) ?
+			((unsigned long long)-1 == (offs = parse_offs(&argv[1][1]))) :
+			((b1 = parse_byte(argv[1])) < 0)) ||
 		(3 == argc && (b2 = parse_byte(argv[2])) < 0))
 	{
 		return 2;
 	}
-	return translate(3 == argc, (unsigned char)b1, (unsigned char)b2);
+	return translate(offs, 3 == argc, (unsigned char)b1, (unsigned char)b2);
 }

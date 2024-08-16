@@ -817,9 +817,9 @@ call :post
 call :post
 
 call :pre 149 -----------------------------
-(pushd %srcdir% & %pcre2grep% --binary-files=binary "dog" ./testdata/grepbinary) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% --binary-files=binary "dog" ./testdata/grepbinary & popd) >>testtrygrep 2>&1
 call :post
-(pushd %srcdir% & %pcre2grep% --binary-files=wrong "dog" ./testdata/grepbinary) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% --binary-files=wrong "dog" ./testdata/grepbinary & popd) >>testtrygrep 2>&1
 call :post
 
 :: This test runs the code that tests locale support. However, on some systems
@@ -841,9 +841,16 @@ set "LC_CTYPE=%LC_CTYPE1%"
 set LC_CTYPE1=
 
 call :pre 151 -----------------------------
-(pushd %srcdir% & %pcre2grep% --colour=always -e this -e The -e "The wo" testdata/grepinputv) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% --colour=always -e this -e The -e "The wo" testdata/grepinputv & popd) >>testtrygrep
 ::call :post
 
+call :pre 152 -----------------------------
+(pushd %srcdir% & %pcre2grep% -nA3 --group-separator="++" "four" testdata/grepinputx & popd) >>testtrygrep
+call :post
+
+call :pre 153 -----------------------------
+(pushd %srcdir% & %pcre2grep% -nA3 --no-group-separator "four" testdata/grepinputx & popd) >>testtrygrep
+call :post
 
 
 
@@ -886,6 +893,22 @@ call :post
 
 call :pre U6 -----------------------------
 (pushd %srcdir% & %pcre2grep% -u -m1 -O "=$x{1d3}$o{744}=" "fox" & popd) <%srcdir%/testdata/grepinputv >>testtrygrep 2>&1
+call :post
+
+call :pre U7 ------------------------------
+(pushd %srcdir% & %pcre2grep% -ui --colour=always "k+|\babc\b" ./testdata/grepinput8 & popd) >>testtrygrep
+call :post
+
+call :pre U8 ------------------------------
+(pushd %srcdir% & %pcre2grep% -UiEP --colour=always "k+|\babc\b" ./testdata/grepinput8 & popd) >>testtrygrep
+call :post
+
+call :pre U9 ------------------------------
+(pushd %srcdir% & %pcre2grep% -u --colour=always "A\d" ./testdata/grepinput8 & popd) >>testtrygrep
+call :post
+
+call :pre U10 ------------------------------
+(pushd %srcdir% & %pcre2grep% -u --posix-digit --colour=always "A\d" ./testdata/grepinput8 & popd) >>testtrygrep
 call :post
 
 %cf% %srcdir%\testdata\grepoutput8 testtrygrep %cfout%

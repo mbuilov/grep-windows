@@ -3,25 +3,27 @@ Instructions how to build native pcre2 libraries and pcre2grep.exe utility with 
 From CYGWIN shell:
 
 1) get archive:
-  wget https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.42.tar.gz
+  wget https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.44.tar.gz
 
 2) unpack archive:
-  tar xf pcre2-10.42.tar.gz
+  tar xf pcre2-10.44.tar.gz
 
 3) go to PCRE2 sources:
-  cd pcre2-pcre2-10.42
+  cd pcre2-pcre2-10.44
 
 4) copy files
-  cp ../pcre2/NMakefile-pcre2-10.42       ./NMakefile
-  cp ../pcre2/config-pcre2-10.42.h        ./src/config.h
-  cp ../pcre2/RunGrepTest-pcre2-10.42.bat ./RunGrepTest.bat
-  cp ../pcre2/RunTest-pcre2-10.42.bat     ./RunTest.bat
+  cp ../pcre2/NMakefile-pcre2-10.44       ./NMakefile
+  cp ../pcre2/config-pcre2-10.44.h        ./src/config.h
+  cp ../pcre2/RunGrepTest-pcre2-10.44.bat ./RunGrepTest.bat
+  cp ../pcre2/RunTest-pcre2-10.44.bat     ./RunTest.bat
   cp ../pcre2/testrepl.c                  ./testrepl.c
   cp ./src/pcre2.h.generic                ./src/pcre2.h
   cp ./src/pcre2_chartables.c.dist        ./src/pcre2_chartables.c
 
+  --tip: ../pcre2/config-pcre2-10.44.h was copied from ./src/config.h.generic, then fixed by hand
+
 5) patch the sources
-  patch -Np1 -i ../pcre2/pcre2-pcre2-10.42.patch
+  patch -Np1 -i ../pcre2/pcre2-pcre2-10.44.patch
 
 6) now start dos prompt with minimal environment (inherit TMP variable value):
   env -i TMP="$(cmd.exe /c set TMP | sed 's/.*=//;s/\x0d//')" $(which cmd.exe) /c start cmd.exe

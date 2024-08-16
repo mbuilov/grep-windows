@@ -1,6 +1,6 @@
 --- orig/src/pcre2grep.c	2022-12-12 20:16:53.000000000 +0300
 +++ fixed/src/pcre2grep.c	2023-07-11 13:00:13.463800300 +0300
-@@ -2468,7 +2468,11 @@
+@@ -2480,7 +2480,11 @@
  necessary, otherwise assume fork(). */
  
  #ifdef WIN32

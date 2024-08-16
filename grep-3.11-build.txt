@@ -1,28 +1,56 @@
 How to build native 32/64-bit Gnu grep.exe with Visual Studio 2022 and WDK10
 
-First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.42-build.txt
+First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.44-build.txt
 
-Second, in the directory containing ./pcre2-pcre2-10.42, build Gnu Grep with PCRE support.
+Second, in the directory containing ./pcre2-pcre2-10.44, build Gnu Grep with PCRE support.
 
 From CYGWIN shell or other unix-like shell:
 
 1) get grep archive:    wget https://ftp.gnu.org/gnu/grep/grep-3.11.tar.xz
 2) unpack sed archive:  tar xf grep-3.11.tar.xz
 3) go to grep sources:  cd grep-3.11
-4) run dos prompt:      cmd /c start cmd.exe
-5) setup compiler:
+4) now start dos prompt with minimal environment (inherit TMP variable value):
+  env -i TMP="$(cmd.exe /c set TMP | sed 's/.*=//;s/\x0d//')" $(which cmd.exe) /c start cmd.exe
+
+In the dos window:
+
+5) prepare environment, change console code page to ACP (Ansi Code Page):
+  set "PATH=C:\Windows\System32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0"
+  set LC_CTYPE=
+  chcp 1251
+  set VSCMD_SKIP_SENDTELEMETRY=1
+
+  (ACP value can be queried by the command: "reg query HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage /v ACP")
+
+6) setup compiler:
   for 64-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
   for 32-bit build:     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86
-6) temporary run sh:    sh
-7) copy build patch:
+
+7) get value of INCLUDE environment variable set by vcvarsall.bat
+  set INCLUDE >include.txt
+
+In the unix-like shell:
+
+8) copy build patch:
   for 64-bit build:     cp ../grep-3.11-build-VS22-x64.patch ./build.patch
   for 32-bit build:     cp ../grep-3.11-build-VS22-x86.patch ./build.patch
-8) fix build patch - change paths to locations of Visual Studio 2022 and WDK10:
-                        sed -i '/Visual Studio/s@.:.*include@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p')"'@' ./build.patch
-                        sed -i '/Windows Kits/s@.:.*ucrt@'"$(env | sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p')"'@'                             ./build.patch
-9) patch grep:          patch -Np1 -i ./build.patch
-10) optionally, add support for inline utf16->utf8 transcoding:
-                        patch -Np1 -i ../grep-3.11-utf16.patch
-11) exit sh:            exit
-12) do compile:         make.bat
-13) check build result: grep.exe --version
+
+9) fix build patch - change paths to locations of Visual Studio 2022 and WDK10:
+  sed -i '/Visual Studio/s@.:.*include@'"$(<include.txt sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\VC\\\\[^=;]*[0-9]\\\\include\).*$@\1@p')"'@' ./build.patch
+  sed -i '/Windows Kits/s@.:.*ucrt@'"$(<include.txt sed -n 's@\\@\\\\@g;/^INCLUDE/s@.*[=;]\([^=;]*\\\\ucrt\).*$@\1@p')"'@'                             ./build.patch
+
+10) patch grep:          patch -Np1 -i ./build.patch
+
+11) optionally, add support for inline utf16->utf8 transcoding:
+  patch -Np1 -i ../grep-3.11-utf16.patch
+
+12) update path to PCRE2 library:
+  sed -i 's@\\pcre2-pcre2-10.[^\\]*@\\pcre2-pcre2-10.44@g' ./make.bat
+
+13) add support for wildcard expansion in program arguments:
+  sed -i 's@pcre2.a@& wsetargv.obj@' ./make.bat
+
+Again in the dos window:
+
+14) do compile:         make.bat
+15) check build result: grep.exe --version

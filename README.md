@@ -21,11 +21,11 @@ Author of the patches: Michael M. Builov (mbuilov@yandex.ru)
 ## Pre-built executables:
 - [`grep-3.11-x64.exe`](/grep-3.11-x64.exe) - grep 3.11 built for Windows10 x64
 - [`grep-3.11-x86.exe`](/grep-3.11-x86.exe) - grep 3.11 built for WindowsXP x86
-- [`pcre2grep-10.44-x64.exe`](/pcre2grep-10.44-x64.exe) - pcre2grep 10.44 built for Windows10 x64
-- [`pcre2grep-10.44-x86.exe`](/pcre2grep-10.44-x86.exe) - pcre2grep 10.44 built for WindowsXP x86
+- [`pcre2grep-10.47-x64.exe`](/pcre2grep-10.47-x64.exe) - pcre2grep 10.47 built for Windows10 x64
+- [`pcre2grep-10.47-x86.exe`](/pcre2grep-10.47-x86.exe) - pcre2grep 10.47 built for WindowsXP x86
 
 ## Instructions how to build pcre2grep
-- [`pcre2-10.44-build.txt`](/pcre2/pcre2-10.44-build.txt)
+- [`pcre2-10.47-build.txt`](/pcre2/pcre2-10.47-build.txt)
 
 ## Instructions how to create build patch
 - [`grep-3.11-build-patch-howto.txt`](/grep-3.11-build-patch-howto.txt)

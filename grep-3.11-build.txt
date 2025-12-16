@@ -1,8 +1,8 @@
 How to build native 32/64-bit Gnu grep.exe with Visual Studio 2022 and WDK10
 
-First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.44-build.txt
+First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.47-build.txt
 
-Second, in the directory containing ./pcre2-pcre2-10.44, build Gnu Grep with PCRE support.
+Second, in the directory containing ./pcre2-10.47, build Gnu Grep with PCRE support.
 
 From CYGWIN shell or other unix-like shell:
 
@@ -45,7 +45,7 @@ In the unix-like shell:
   patch -Np1 -i ../grep-3.11-utf16.patch
 
 12) update path to PCRE2 library:
-  sed -i 's@\\pcre2-pcre2-10.[^\\]*@\\pcre2-pcre2-10.44@g' ./make.bat
+  sed -i 's@\\pcre2-10.[^\\]*@\\pcre2-10.47@g' ./make.bat
 
 13) add support for wildcard expansion in program arguments:
   sed -i 's@pcre2.a@& wsetargv.obj@' ./make.bat

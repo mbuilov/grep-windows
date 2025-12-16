@@ -5,9 +5,9 @@ While building, it is possible to save build log and create a patch - for compil
 This is how grep-3.11-build-VS22-x64.patch and grep-3.11-build-VS22-x86.patch were created.
 
 
-First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.42-build.txt
+First, build pcre2.a and pcre2posix.a libraries - see pcre2/pcre2-10.47-build.txt
 
-Second, in the directory containing ./pcre2-pcre2-10.42, build Gnu Grep with PCRE support.
+Second, in the directory containing ./pcre2-10.47, build Gnu Grep with PCRE support.
 
 From CYGWIN shell:
 
@@ -39,11 +39,11 @@ From CYGWIN shell:
 8) check that Gnu Make is installed in CYGWIN and it is working (Gnu Make is required for the build):
   make --version
 
-9) configure grep (assuming pcre2 library was built at ../pcre2-pcre2-10.42):
-  CFLAGS= CC=cl CPP="cl /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-pcre2-10.42/src" PCRE_LIBS=../../pcre2-pcre2-10.42/pcre2.a ./configure --host=mingw64 --disable-dependency-tracking --disable-silent-rules --disable-nls pcre_cv_have_pcre2_compile=yes
+9) configure grep (assuming pcre2 library was built at ../pcre2-10.47):
+  CFLAGS= CC=cl CPP="cl /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-10.47/src" PCRE_LIBS=../../pcre2-10.47/pcre2.a ./configure --host=mingw64 --disable-dependency-tracking --disable-silent-rules --disable-nls pcre_cv_have_pcre2_compile=yes
 
   --tip: when building 32-bit version of the Gnu Grep utility, add "/D_WIN32_WINNT=0x501" compiler switch:
-  CFLAGS= CC="cl /D_WIN32_WINNT=0x501" CPP="cl /D_WIN32_WINNT=0x501 /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-pcre2-10.42/src" PCRE_LIBS=../../pcre2-pcre2-10.42/pcre2.a ./configure --host=mingw32 --disable-dependency-tracking --disable-silent-rules --disable-nls pcre_cv_have_pcre2_compile=yes
+  CFLAGS= CC="cl /D_WIN32_WINNT=0x501" CPP="cl /D_WIN32_WINNT=0x501 /E" LD=lib ARFLAGS="/OUT:" PCRE_CFLAGS="/DPCRE2_STATIC /I../../pcre2-10.47/src" PCRE_LIBS=../../pcre2-10.47/pcre2.a ./configure --host=mingw32 --disable-dependency-tracking --disable-silent-rules --disable-nls pcre_cv_have_pcre2_compile=yes
 
 10) configure script is not fully functional to create correct Makefiles for Visual Studio - they are need to be fixed manually:
   sed -i 's/^SUBDIRS = .*/SUBDIRS = lib src/'                       ./Makefile

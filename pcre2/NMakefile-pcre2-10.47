@@ -46,6 +46,10 @@ src\pcre2_chartables.obj                         : src\pcre2_chartables.c
 	$(CC) src\pcre2_chartables.c         $(CCFLAGS)src\pcre2_chartables.obj
 src\pcre2_compile.obj                            : src\pcre2_compile.c
 	$(CC) src\pcre2_compile.c            $(CCFLAGS)src\pcre2_compile.obj
+src\pcre2_compile_cgroup.obj                     : src\pcre2_compile_cgroup.c
+	$(CC) src\pcre2_compile_cgroup.c     $(CCFLAGS)src\pcre2_compile_cgroup.obj
+src\pcre2_compile_class.obj                      : src\pcre2_compile_class.c
+	$(CC) src\pcre2_compile_class.c      $(CCFLAGS)src\pcre2_compile_class.obj
 src\pcre2_config.obj                             : src\pcre2_config.c
 	$(CC) src\pcre2_config.c             $(CCFLAGS)src\pcre2_config.obj
 src\pcre2_context.obj                            : src\pcre2_context.c
@@ -68,6 +72,8 @@ src\pcre2_match.obj                              : src\pcre2_match.c
 	$(CC) src\pcre2_match.c              $(CCFLAGS)src\pcre2_match.obj
 src\pcre2_match_data.obj                         : src\pcre2_match_data.c
 	$(CC) src\pcre2_match_data.c         $(CCFLAGS)src\pcre2_match_data.obj
+src\pcre2_match_next.obj                         : src\pcre2_match_next.c
+	$(CC) src\pcre2_match_next.c         $(CCFLAGS)src\pcre2_match_next.obj
 src\pcre2_newline.obj                            : src\pcre2_newline.c
 	$(CC) src\pcre2_newline.c            $(CCFLAGS)src\pcre2_newline.obj
 src\pcre2_ord2utf.obj                            : src\pcre2_ord2utf.c
@@ -100,33 +106,36 @@ src\pcre2posix.obj                               : src\pcre2posix.c
 	$(CC) src\pcre2posix.c               $(CCFLAGS)src\pcre2posix.obj
 
 OBJS = \
-    src\pcre2_auto_possess.obj \
-    src\pcre2_chartables.obj   \
-    src\pcre2_compile.obj      \
-    src\pcre2_config.obj       \
-    src\pcre2_context.obj      \
-    src\pcre2_convert.obj      \
-    src\pcre2_dfa_match.obj    \
-    src\pcre2_error.obj        \
-    src\pcre2_extuni.obj       \
-    src\pcre2_find_bracket.obj \
-    src\pcre2_jit_compile.obj  \
-    src\pcre2_maketables.obj   \
-    src\pcre2_match.obj        \
-    src\pcre2_match_data.obj   \
-    src\pcre2_newline.obj      \
-    src\pcre2_ord2utf.obj      \
-    src\pcre2_pattern_info.obj \
-    src\pcre2_script_run.obj   \
-    src\pcre2_serialize.obj    \
-    src\pcre2_string_utils.obj \
-    src\pcre2_study.obj        \
-    src\pcre2_substitute.obj   \
-    src\pcre2_substring.obj    \
-    src\pcre2_tables.obj       \
-    src\pcre2_ucd.obj          \
-    src\pcre2_valid_utf.obj    \
-    src\pcre2_xclass.obj       \
+    src\pcre2_auto_possess.obj   \
+    src\pcre2_chartables.obj     \
+    src\pcre2_compile.obj        \
+    src\pcre2_compile_cgroup.obj \
+    src\pcre2_compile_class.obj  \
+    src\pcre2_config.obj         \
+    src\pcre2_context.obj        \
+    src\pcre2_convert.obj        \
+    src\pcre2_dfa_match.obj      \
+    src\pcre2_error.obj          \
+    src\pcre2_extuni.obj         \
+    src\pcre2_find_bracket.obj   \
+    src\pcre2_jit_compile.obj    \
+    src\pcre2_maketables.obj     \
+    src\pcre2_match.obj          \
+    src\pcre2_match_data.obj     \
+    src\pcre2_match_next.obj     \
+    src\pcre2_newline.obj        \
+    src\pcre2_ord2utf.obj        \
+    src\pcre2_pattern_info.obj   \
+    src\pcre2_script_run.obj     \
+    src\pcre2_serialize.obj      \
+    src\pcre2_string_utils.obj   \
+    src\pcre2_study.obj          \
+    src\pcre2_substitute.obj     \
+    src\pcre2_substring.obj      \
+    src\pcre2_tables.obj         \
+    src\pcre2_ucd.obj            \
+    src\pcre2_valid_utf.obj      \
+    src\pcre2_xclass.obj         \
 	src\pcre2_chkdint.obj
 
 $(LIBPCRE2): $(OBJS)

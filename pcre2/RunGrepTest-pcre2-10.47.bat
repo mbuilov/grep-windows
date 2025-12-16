@@ -19,8 +19,9 @@ set GREP_COLOR=
 :: Remember the current (build) directory and set the program to be tested.
 
 set builddir="%CD%"
-set pcre2grep=%builddir%\pcre2grep.exe
-set pcre2test=%builddir%\pcre2test.exe
+
+if [%pcre2grep%]==[] set pcre2grep=%builddir%\pcre2grep.exe
+if [%pcre2test%]==[] set pcre2test=%builddir%\pcre2test.exe
 
 if NOT exist %pcre2grep% (
   echo ** %pcre2grep% does not exist.
@@ -235,7 +236,7 @@ call :pre 35 -----------------------------
 call :post
 
 call :pre 36 -----------------------------
-(pushd %srcdir% & %pcre2grep% -L -r --include="grepinput[^C]" --exclude "grepinput$" --exclude=grepinput8 --exclude=grepinputM --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -L -r --include="grepinput[^C]" --exclude "grepinput$" --exclude="grepinput(Bad)?8" --exclude=grepinputM --exclude=grepinputUN --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
 call :post
 
 call :pre 37 -----------------------------
@@ -278,8 +279,11 @@ call :post
 
 call :pre 46 ------------------------------
 (pushd %srcdir% & %pcre2grep% -e "unopened)" -e abc ./testdata/grepinput & popd) >>testtrygrep 2>&1
+call :post
 (pushd %srcdir% & %pcre2grep% -eabc -e "(unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+call :post
 (pushd %srcdir% & %pcre2grep% -eabc -e xyz -e "[unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+call :post
 (pushd %srcdir% & %pcre2grep% --regex=123 -eabc -e xyz -e "[unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
 
@@ -354,7 +358,7 @@ call :pre 62 -----------------------------
 call :post
 
 call :pre 63 -----------------------------
-(pushd %srcdir% & %pcre2grep% --recursion-limit=1K --no-jit -M "This is a file(.|\R)*file." ./testdata/grepinput & popd) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% --recursion-limit=1000 --no-jit -M "This is a file(.|\R)*file." ./testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
 
 call :pre 64 ------------------------------
@@ -493,25 +497,28 @@ call :pre 95 -----------------------------
 call :post
 
 call :pre 96 -----------------------------
-(pushd %srcdir% & %pcre2grep% -L -r --include-dir=testdata --exclude "^^(?^!grepinput)" --exclude=grepinput[MC] "fox" ./test* | sort & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -L -r --include-dir=testdata --exclude "^^(?^!grepinput)" --exclude=grepinput[MCU] "fox" ./test* | sort & popd) >>testtrygrep
 call :post
 
 call :pre 97 -----------------------------
 echo grepinput$>testtemp1grep
 echo grepinput8>>testtemp1grep
-(pushd %srcdir% & %pcre2grep% -L -r --include=grepinput --exclude=grepinput[MC] --exclude-from %builddir%\testtemp1grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
+echo grepinputBad8>>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -L -r --include=grepinput --exclude=grepinput[MCU] --exclude-from %builddir%\testtemp1grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
 call :post
 
 call :pre 98 -----------------------------
 echo grepinput$>testtemp1grep
 echo grepinput8>>testtemp1grep
-(pushd %srcdir% & %pcre2grep% -L -r --exclude=grepinput3 --exclude=grepinput[MC] --include=grepinput --exclude-from %builddir%\testtemp1grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
+echo grepinputBad8>>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -L -r --exclude=grepinput3 --exclude=grepinput[MCU] --include=grepinput --exclude-from %builddir%\testtemp1grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
 call :post
 
 call :pre 99 -----------------------------
 echo grepinput$>testtemp1grep
 echo grepinput8>testtemp2grep
-(pushd %srcdir% & %pcre2grep% -L -r --include grepinput --exclude=grepinput[MC] --exclude-from %builddir%\testtemp1grep --exclude-from=%builddir%\testtemp2grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
+echo grepinputBad8>>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -L -r --include grepinput --exclude=grepinput[MCU] --exclude-from %builddir%\testtemp1grep --exclude-from=%builddir%\testtemp2grep --exclude-dir="^\." "fox" ./testdata | sort & popd) >>testtrygrep
 call :post
 
 call :pre 100 ------------------------------
@@ -581,7 +588,7 @@ call :pre 115 -----------------------------
 call :post
 
 call :pre 116 -----------------------------
-(pushd %srcdir% & %pcre2grep% --exclude=grepinput[MC] -th "the" testdata/grepinput* & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% --exclude=grepinput[MCU] -th "the" testdata/grepinput* & popd) >>testtrygrep
 call :post
 
 call :pre 117 -----------------------------
@@ -600,6 +607,8 @@ call :post
 call :pre 120 ------------------------------
 (pushd %srcdir% & %pcre2grep% -HO "$0:$2$1$3" "(\w+) binary (\w+)(\.)?" ./testdata/grepinput & popd) >>testtrygrep
 call :post
+(pushd %srcdir% & %pcre2grep% -HO "$&:$2$1$3" "(\w+) binary (\w+)(\.)?" ./testdata/grepinput & popd) >>testtrygrep
+call :post
 (pushd %srcdir% & %pcre2grep% -m 1 -O "$0:$a$b$e$f$r$t$v" "(\w+) binary (\w+)(\.)?" ./testdata/grepinput & popd) >>testtrygrep
 call :post
 (pushd %srcdir% & %pcre2grep% -HO "${X}" "(\w+) binary (\w+)(\.)?" ./testdata/grepinput & popd) >>testtrygrep 2>&1
@@ -614,15 +623,15 @@ call :post
 call :post
 
 call :pre 121 -----------------------------
-(pushd %srcdir% & %pcre2grep% -F "\E and (regex)" ./testdata/grepinputv & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -F "\E and (regex)" testdata/grepinputv & popd) >>testtrygrep
 call :post
 
 call :pre 122 -----------------------------
-(pushd %srcdir% & %pcre2grep% -w "cat|dog" ./testdata/grepinputv & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -w "cat|dog" testdata/grepinputv & popd) >>testtrygrep
 call :post
 
 call :pre 123 -----------------------------
-(pushd %srcdir% & %pcre2grep% -w "dog|cat" ./testdata/grepinputv & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -w "dog|cat" testdata/grepinputv & popd) >>testtrygrep
 call :post
 
 call :pre 124 -----------------------------
@@ -646,7 +655,7 @@ call :post
 %pcre2grep% --colour=always --allow-lookaround-bsk "(?=[ac]\K)" testNinputgrep >>testtrygrep
 call :post
 set "GREP_COLORS1=%GREP_COLORS%"
-set "GREP_COLORS=ms=1;20"
+set GREP_COLORS=ms=1;20
 %pcre2grep% --colour=always --allow-lookaround-bsk "(?=[ac]\K)" testNinputgrep >>testtrygrep
 call :post
 set "GREP_COLORS=%GREP_COLORS1%"
@@ -689,30 +698,19 @@ call :pre 131 -----------------------------
 call :post
 
 call :pre 132 -----------------------------
-::(cd $srcdir; exec 3<testdata/grepinput; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; echo '---'; head -1 <&3; exec 3<&-) >>testtrygrep 2>&1
-echo.match 1:>>testtrygrep
-echo. a>>testtrygrep
-echo.match 2:>>testtrygrep
-echo. b>>testtrygrep
-echo.--->>testtrygrep
-echo. a>>testtrygrep
+:: The Unix tests use fd3 here, but Windows only has StdIn/StdOut/StdErr (which, at the kernel
+:: level, are not even numbered). Use a subshell instead.
+(pushd %srcdir% & (%pcre2grep% -m1 -A3 "^match" & echo ---& %pcre2grep% -m1 ".*") <testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
 
 call :pre 133 -----------------------------
-::(cd $srcdir; exec 3<testdata/grepinput; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; echo '---'; $valgrind $vjs $pcre2grep -m1 -A3 '^match' <&3; exec 3<&-) >>testtrygrep 2>&1
-echo.match 1:>>testtrygrep
-echo. a>>testtrygrep
-echo.match 2:>>testtrygrep
-echo. b>>testtrygrep
-echo.--->>testtrygrep
-echo.match 2:>>testtrygrep
-echo. b>>testtrygrep
-echo.match 3:>>testtrygrep
-echo. c>>testtrygrep
+:: The Unix tests use fd3 here, but Windows only has StdIn/StdOut/StdErr (which, at the kernel
+:: level, are not even numbered). Use a subshell instead.
+(pushd %srcdir% & (%pcre2grep% -m1 -A3 "^match" & echo ---& %pcre2grep% -m1 -A3 "^match") <testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
 
 call :pre 134 -----------------------------
-(pushd %srcdir% & %pcre2grep% --max-count=1 -nH -O "=$x{41}$x423$o{103}$o1045=" "fox" - & popd) <%srcdir%/testdata/grepinputv >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% --max-count=1 -nH -O "=$x{41}$x423$o{103}$o1045=" "fox" - & popd) <%srcdir%\testdata\grepinputv >>testtrygrep 2>&1
 call :post
 
 call :pre 135 -----------------------------
@@ -726,9 +724,9 @@ call :post
 call :post
 
 call :pre 136 -----------------------------
-(pushd %srcdir% & %pcre2grep% -m1MK -o1 --om-capture=0 "pattern()()()()" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% -m1MK -o1 --om-capture=0 "pattern()()()()" testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
-(pushd %srcdir% & %pcre2grep% --max-count=1MK -o1 --om-capture=0 "pattern()()()()" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% --max-count=1MK -o1 --om-capture=0 "pattern()()()()" testdata/grepinput & popd) >>testtrygrep 2>&1
 call :post
 
 call :pre 137 -----------------------------
@@ -742,11 +740,11 @@ call :pre 138 -----------------------------
 call :post
 
 call :pre 139 -----------------------------
-(pushd %srcdir% & %pcre2grep% --line-buffered "fox" ./testdata/grepinputv & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% --line-buffered "fox" testdata/grepinputv & popd) >>testtrygrep
 call :post
 
 call :pre 140 -----------------------------
-(pushd %srcdir% & %pcre2grep% --buffer-size=10 -A1 "brown" ./testdata/grepinputv & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% --buffer-size=10 -A1 "brown" testdata/grepinputv & popd) >>testtrygrep
 call :post
 
 call :pre 141 -----------------------------
@@ -763,25 +761,25 @@ call :post
 
 call :pre 143 -----------------------------
 <nul set /p="fox|cat">testtemp1grep
-%pcre2grep% -f - %srcdir%/testdata/grepinputv <testtemp1grep >>testtrygrep 2>&1
+%pcre2grep% -f - %srcdir%\testdata\grepinputv <testtemp1grep >>testtrygrep 2>&1
 call :post
 
 call :pre 144 -----------------------------
-%pcre2grep% -f /non/exist %srcdir%/testdata/grepinputv >>testtrygrep 2>&1
+%pcre2grep% -f /non/exist %srcdir%\testdata\grepinputv >>testtrygrep 2>&1
 call :post
 
 call :pre 145 -----------------------------
 <nul set /p="*meta*!CR!dog.">testtemp1grep
-%pcre2grep% -Ncr -F -f testtemp1grep %srcdir%/testdata/grepinputv >>testtrygrep 2>&1
+%pcre2grep% -Ncr -F -f testtemp1grep %srcdir%\testdata\grepinputv >>testtrygrep 2>&1
 call :post
 
 call :pre 146 -----------------------------
 <nul set /p="A123B">testtemp1grep
 %pcre2grep% -H -e "123|fox" - <testtemp1grep >>testtrygrep 2>&1
 call :post
-%pcre2grep% -h -e "123|fox" - %srcdir%/testdata/grepinputv <testtemp1grep >>testtrygrep 2>&1
+%pcre2grep% -h -e "123|fox" - %srcdir%\testdata\grepinputv <testtemp1grep >>testtrygrep 2>&1
 call :post
-%pcre2grep% - %srcdir%/testdata/grepinputv <testtemp1grep >>testtrygrep 2>&1
+%pcre2grep% - %srcdir%\testdata\grepinputv <testtemp1grep >>testtrygrep 2>&1
 call :post
 
 call :pre 147 -----------------------------
@@ -822,17 +820,13 @@ call :post
 (pushd %srcdir% & %pcre2grep% --binary-files=wrong "dog" ./testdata/grepbinary & popd) >>testtrygrep 2>&1
 call :post
 
-:: This test runs the code that tests locale support. However, on some systems
-:: (e.g. Alpine Linux) there is no locale support and running this test just
-:: generates a "no match" result. Therefore, we test for locale support, and if
-:: it is found missing, we pretend that the test has run as expected so that the
-:: output matches.
-
 call :pre 150 -----------------------------
+:: The Unix version of this tests checks for whether locales are supported. On Windows,
+:: we assume they always are.
 set "LC_ALL1=%LC_ALL%"
 set LC_ALL=
 set "LC_CTYPE1=%LC_CTYPE%"
-set "LC_CTYPE=badlocale"
+set LC_CTYPE=locale.bad
 (pushd %srcdir% & %pcre2grep% abc NUL & popd) >>testtrygrep 2>&1
 call :post
 set "LC_ALL=%LC_ALL1%"
@@ -842,17 +836,51 @@ set LC_CTYPE1=
 
 call :pre 151 -----------------------------
 (pushd %srcdir% & %pcre2grep% --colour=always -e this -e The -e "The wo" testdata/grepinputv & popd) >>testtrygrep
-::call :post
+call :post
 
 call :pre 152 -----------------------------
-(pushd %srcdir% & %pcre2grep% -nA3 --group-separator="++" "four" testdata/grepinputx & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -nA3 --group-separator="++" "four" ./testdata/grepinputx & popd) >>testtrygrep
 call :post
 
 call :pre 153 -----------------------------
-(pushd %srcdir% & %pcre2grep% -nA3 --no-group-separator "four" testdata/grepinputx & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -nA3 --no-group-separator "four" ./testdata/grepinputx & popd) >>testtrygrep
 call :post
 
+call :pre 154 -----------------------------
+rem.>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -f %builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
+call :post
 
+call :pre 155 -----------------------------
+echo.>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -f %builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
+call :post
+
+call :pre 156 -----------------------------
+<nul set /p=""|.\testrepl 1 a>testtemp1grep
+(pushd %srcdir% & %pcre2grep% --posix-pattern-file --file %builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
+call :post
+
+call :pre 157 -----------------------------
+<nul set /p=spaces !LF!>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -o --posix-pattern-file --file=%builddir%\testtemp1grep ./testdata/grepinputv >%builddir%\testtemp2grep && %pcre2grep% -q "s " %builddir%\testtemp2grep & popd) >>testtrygrep
+call :post
+
+call :pre 158 -----------------------------
+<nul set /p=spaces.!LF!>testtemp1grep
+(pushd %srcdir% & %pcre2grep% -f %builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
+call :post
+
+call :pre 159 -----------------------------
+echo spaces.>testtemp1grep
+(pushd %srcdir% & %pcre2grep% --posix-pattern-file -f%builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
+call :post
+
+call :pre 160 -----------------------------
+(pushd %srcdir% & %pcre2grep% -nC3 "^(ert|jkl)" ./testdata/grepinput & popd) >>testtrygrep
+call :post
+(pushd %srcdir% & %pcre2grep% -n -B4 -A2 "^(ert|dfg)" ./testdata/grepinput & popd) >>testtrygrep
+call :post
 
 :: Now compare the results.
 
@@ -882,17 +910,15 @@ call :pre U3 ------------------------------
 call :post
 
 call :pre U4 ------------------------------
-<nul set /p="Aက�CD Z!LF!">testtemp1grep
-(pushd %srcdir% & %pcre2grep% -u -o "...." %builddir%/testtemp1grep & popd) >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% -u -o "...." ./testdata/grepinputBad8 & popd) >>testtrygrep 2>&1
 call :post
 
 call :pre U5 ------------------------------
-<nul set /p="Aက�CD Z!LF!">testtemp1grep
-(pushd %srcdir% & %pcre2grep% -U -o "...." %builddir%/testtemp1grep & popd) >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -U -o "...." ./testdata/grepinputBad8 & popd) >>testtrygrep
 call :post
 
 call :pre U6 -----------------------------
-(pushd %srcdir% & %pcre2grep% -u -m1 -O "=$x{1d3}$o{744}=" "fox" & popd) <%srcdir%/testdata/grepinputv >>testtrygrep 2>&1
+(pushd %srcdir% & %pcre2grep% -u -m1 -O "=$x{1d3}$o{744}=" "fox" & popd) <%srcdir%\testdata\grepinputv >>testtrygrep 2>&1
 call :post
 
 call :pre U7 ------------------------------
@@ -919,9 +945,8 @@ if ERRORLEVEL 1 exit /b 1
 :: We go to some contortions to try to ensure that the tests for the various
 :: newline settings will work in environments where the normal newline sequence
 :: is not \n. Do not use exported files, whose line endings might be changed.
-:: Instead, create an input file using printf so that its contents are exactly
-:: what we want. Note the messy fudge to get printf to write a string that
-:: starts with a hyphen. These tests are run in the build directory.
+:: Instead, create an input file so that its contents are exactly what we want.
+:: These tests are run in the build directory.
 
 echo Testing pcre2grep newline settings
 rem.>testtrygrep
@@ -930,26 +955,36 @@ rem.>testtrygrep
 
 call :pre N1 ------------------------------
 %pcre2grep% -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+call :post
 %pcre2grep% -B1 -n -N CR "^def" testNinputgrep >>testtrygrep
+call :post
 
 call :pre N2 ------------------------------
 %pcre2grep% -n --newline=crlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+call :post
 %pcre2grep% -B1 -n -N CRLF "^ghi" testNinputgrep >>testtrygrep
+call :post
 
 call :pre N3 ------------------------------
 set "pattern=def!CR!jkl"
 %pcre2grep% -n --newline=cr -F "!pattern!" testNinputgrep >>testtrygrep
+call :post
 
 call :pre N4 ------------------------------
-%pcre2grep% -n --newline=crlf -F -f %srcdir%/testdata/greppatN4 testNinputgrep >>testtrygrep
+%pcre2grep% -n --newline=crlf -F -f %srcdir%\testdata\greppatN4 testNinputgrep >>testtrygrep
+call :post
 
 call :pre N5 ------------------------------
 %pcre2grep% -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+call :post
 %pcre2grep% -B1 -n --newline=any "^def" testNinputgrep >>testtrygrep
+call :post
 
 call :pre N6 ------------------------------
 %pcre2grep% -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+call :post
 %pcre2grep% -B1 -n --newline=anycrlf "^jkl" testNinputgrep >>testtrygrep
+call :post
 
 call :pre N7 ------------------------------
 <nul set /p="xy">testNinputgrep
@@ -958,7 +993,14 @@ cmd /u /c <nul set /p="z">>testNinputgrep
 cmd /u /c <nul set /p="c">>testNinputgrep
 <nul set /p="def">>testNinputgrep
 %pcre2grep% -na --newline=nul "^(abc|def)" testNinputgrep | .\testrepl 0 40 >>testtrygrep
+call :post
 %pcre2grep% -B1 -na --newline=nul "^(abc|def)" testNinputgrep | .\testrepl 0 40 >>testtrygrep
+call :post
+
+call :pre N8 ------------------------------
+%pcre2grep% -na --newline=anycrlf "^a" %srcdir%\testdata\grepinputBad8_Trail >>testtrygrep
+call :post
+
 <nul set /p=""|.\testrepl 1 a>>testtrygrep
 
 %cf% %srcdir%\testdata\grepoutputN testtrygrep %cfout%
@@ -975,11 +1017,22 @@ echo Testing pcre2grep newline settings with UTF-8 features
 rem.>testtrygrep
 
 call :pre UN1 ------------------------------
-<nul set /p="abcሴdef!LF!xyz">testNinputgrep
-%pcre2grep% -nau --newline=anycrlf "^(abc|def)" testNinputgrep >>testtrygrep
+%pcre2grep% -nau --newline=anycrlf "^(abc|def)" %srcdir%\testdata\grepinputUN >>testtrygrep
+call :post
+
+call :pre UN2 ------------------------------
+%pcre2grep% -nauU --newline=anycrlf "^a" %srcdir%\testdata\grepinputBad8_Trail >>testtrygrep
+call :post
+
+:: there is a regression in tests: output of UN1 test is ignored
+:: and not accounted in %srcdir%\testdata\grepoutputUN - fix it
+echo.---------------------------- Test UN1 ------------------------------>grepoutputUN-fixed
+<nul set /p="1:abcሴdef!LF!RC=0!LF!">>grepoutputUN-fixed
+type %srcdir%\testdata\grepoutputUN>>grepoutputUN-fixed
+
 <nul set /p=""|.\testrepl 1 a>>testtrygrep
 
-%cf% %srcdir%\testdata\grepoutputUN testtrygrep %cfout%
+%cf% grepoutputUN-fixed testtrygrep %cfout%
 if ERRORLEVEL 1 exit /b 1
 :skip_utf8_2
 
@@ -996,12 +1049,25 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo Testing pcre2grep script callouts
-%pcre2grep% "(T)(..(.))(?C'cmd|/c echo|Arg1: [$1] [$2] [$3]|Arg2: ^$|${1}^$| ($4) ($14) ($0)')()" %srcdir%/testdata/grepinputv >testtrygrep
-%pcre2grep% "(T)(..(.))()()()()()()()(..)(?C'cmd|/c echo|Arg1: [$11] [${11}]')" %srcdir%/testdata/grepinputv >>testtrygrep
-%pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%/testdata/grepinputv >>testtrygrep
-%pcre2grep% "(T)(?C'cmd|/c echo|$0:$1&echo.')" %srcdir%/testdata/grepinputv >>testtrygrep
-%pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%/testdata/grepinputv >>testtrygrep
-%pcre2grep% -m1 "(T)(?C'|$0:$1:$x{41}$o{101}$n')" %srcdir%/testdata/grepinputv >>testtrygrep
+rem.>testtrygrep
+call :pre2 1 ---
+%pcre2grep% "(T)(..(.))(?C'cmd|/c echo|Arg1: [$1] [$2] [$3]|Arg2: ^$|${1}^$| ($4) ($14) ($0)')()" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 2 ---
+%pcre2grep% "(T)(..(.))()()()()()()()(..)(?C'cmd|/c echo|Arg1: [$11] [${11}]')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 3 ---
+%pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 4 ---
+%pcre2grep% "(T)(?C'cmd|/c echo|$0:$1&echo.')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 5 ---
+%pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 6 ---
+%pcre2grep% -m1 "(T)(?C'|$0:$1:$x{41}$o{101}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
 %pcre2grep% --help | %pcre2grep% -q "Non-fork callout scripts in patterns are supported"
 if %ERRORLEVEL% equ 0 (
   set nonfork=1
@@ -1014,11 +1080,19 @@ if ERRORLEVEL 1 exit /b 1
 
 :: These callout tests need UTF support.
 
-if %utf8% equ 0 goto :skip_scripts
+if %utf8% equ 0 (
+  echo Skipping pcre2grep script callout UTF-8 tests: no UTF-8 support in PCRE2 library
+  goto :skip_scripts
+)
 
 echo Testing pcre2grep script callout with UTF-8 features
-%pcre2grep% -u "(T)(?C'|$0:$x{a6}$n')" %srcdir%/testdata/grepinputv >testtrygrep
-%pcre2grep% -u "(T)(?C'cmd|/c <nul set /p=$0:$x{a6}&echo.&echo.')" %srcdir%/testdata/grepinputv >>testtrygrep
+rem.>testtrygrep
+call :pre2 1 ---
+%pcre2grep% -u "(T)(?C'|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
+call :pre2 2 ---
+%pcre2grep% -u "(T)(?C'cmd|/c <nul set /p=$0:$x{a6}&echo.&echo.')" %srcdir%\testdata\grepinputv >>testtrygrep
+call :post
 
 if %nonfork% equ 1 (
   %cf% %srcdir%\testdata\grepoutputCNU testtrygrep %cfout%
@@ -1057,13 +1131,17 @@ if ERRORLEVEL 1 exit /b 1
 :: is not checked.
 
 echo Testing miscellaneous pcre2grep arguments (unchecked)
-echo.>testtrygrep
+rem.>testtrygrep
 call :checkspecial "-xxxxx" 2 || exit /b 1
 call :checkspecial "--help" 0 || exit /b 1
 call :checkspecial "--line-buffered --colour=auto abc nul" 1 || exit /b 1
 call :checkspecial "--line-buffered --color abc nul" 1 || exit /b 1
 call :checkspecial "-dskip abc ." 1 || exit /b 1
 call :checkspecial "-Dread -Dskip abc nul" 1 || exit /b 1
+call :checkspecial "-f %srcdir%\testdata\greplistBad nul" 2 || exit /b 1
+call :checkspecial "(unpaired nul" 2 || exit /b 1
+call :checkspecial "-e (unpaired1 -e (unpaired2 nul" 2 || exit /b 1
+
 
 :: Clean up local working files
 del testcf testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
@@ -1083,6 +1161,10 @@ exit /b 0
 :pre
 echo Test %1
 echo ---------------------------- Test %1 %2>>testtrygrep
+exit /b 0
+
+:pre2
+echo --- Test %1 %2>>testtrygrep
 exit /b 0
 
 :post

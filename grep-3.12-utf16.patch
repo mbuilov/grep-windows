@@ -1,5 +1,5 @@
 --- grep-3.12/src/grep.c	2025-04-08 19:32:24.000000000 +0300
-+++ grep-3.12/src/grep.c	2026-11-26 12:02:57.555721400 +0300
++++ grep-3.12/src/grep.c	2026-11-26 15:16:08.298781300 +0300
 @@ -481,6 +481,15 @@
      stdout_errno = errno;
  }
@@ -97,7 +97,7 @@
        num += out_line && num < INTMAX_MAX;
        do
          offset_width++;
-@@ -1753,20 +1775,393 @@
+@@ -1753,20 +1775,400 @@
    return false;
  }
  
@@ -186,7 +186,7 @@
 +        return -1;
 +      return READ_UTF16_LE;
 +    }
-+  return 0;
++  return READ_UTF16_AUTO;
 +}
 +
 +#define UTF8_MAX_LEN 4
@@ -285,11 +285,13 @@
 +  return (unsigned) n;
 +}
 +
-+static size_t utf16_pos = 0;
++static int read_utf16_revert;
++
++static size_t utf16_pos;
 +
 +static utf8_char_t utf8_buf[UTF8_MAX_LEN];
-+static unsigned utf8_offset = 0;
-+static unsigned utf8_filled = 0;
++static unsigned utf8_offset;
++static unsigned utf8_filled;
 +
 +static size_t utf16_to_utf8 (void *buf, size_t count)
 +{
@@ -315,7 +317,7 @@
 +  for (;;)
 +    {
 +
-+      if (read_utf16 == 1)
++      if (!read_utf16_revert)
 +        {
 +          while (s < (const utf16_char_t*) mapped_end)
 +            {
@@ -326,7 +328,7 @@
 +
 +              if (0xFFFE == x)
 +                {
-+                  read_utf16 = 2; /* from now, revert bytes */
++                  read_utf16_revert = 1; /* from now, revert bytes */
 +                  break; /* skip BOM */
 +                }
 +
@@ -356,11 +358,11 @@
 +              else if ((d += sz) == de)
 +                break;
 +            }
-+          if (read_utf16 == 1)
++          if (!read_utf16_revert)
 +            break;
 +        }
 +
-+      if (read_utf16 != 1)
++      if (read_utf16_revert)
 +        {
 +          while (s < (const utf16_char_t*) mapped_end)
 +            {
@@ -371,7 +373,7 @@
 +
 +              if (0xFFFE == x)
 +                {
-+                  read_utf16 = 1; /* from now, do not revert bytes */
++                  read_utf16_revert = 0; /* from now, do not revert bytes */
 +                  break; /* skip BOM */
 +                }
 +
@@ -401,7 +403,7 @@
 +              else if ((d += sz) == de)
 +                break;
 +            }
-+          if (read_utf16 != 1)
++          if (read_utf16_revert)
 +            break;
 +        }
 +    }
@@ -473,13 +475,18 @@
 +              return true;
 +            }
 +
-+          if (READ_UTF16_AUTO == read_utf16)
-+            read_utf16 = file_byte_order ? file_byte_order : host_byte_order;
++          read_utf16_revert = READ_UTF16_AUTO == read_utf16 ?
++            READ_UTF16_AUTO == file_byte_order ? 0/*assume host byte order*/ :
++              file_byte_order != host_byte_order :
++              read_utf16 != host_byte_order;
 +
-+          read_utf16 = read_utf16 == host_byte_order ? 1 : 2;
-+
-+          if (file_byte_order)
++          if (READ_UTF16_AUTO != file_byte_order)
 +            mapped_addr = (const char*) mapped_addr + 2; /* skip BOM */
++
++          utf16_pos = 0;
++
++          utf8_offset = 0;
++          utf8_filled = 0;
 +        }
 +      desc = -333;
 +    }
@@ -501,7 +508,7 @@
      }
    return grepdesc (desc, command_line);
  }
-@@ -1806,7 +2201,7 @@
+@@ -1806,7 +2208,7 @@
  static void
  finalize_input (int fd, struct stat const *st, bool ineof)
  {
@@ -510,7 +517,7 @@
        && (outleft
            ? (!ineof
               && (seek_failed
-@@ -1833,25 +2228,25 @@
+@@ -1833,25 +2235,25 @@
       example, normally DESC is a directory only at the top level, but
       there is an exception if some other process substitutes a
       directory for a non-directory while 'grep' is running.  */
@@ -541,7 +548,7 @@
        && directories == RECURSE_DIRECTORIES && S_ISDIR (st.st_mode))
      {
        /* Traverse the directory starting with its full name, because
-@@ -1882,7 +2277,7 @@
+@@ -1882,7 +2284,7 @@
          suppressible_error (errno);
        return status;
      }
@@ -550,7 +557,7 @@
        && ((directories == SKIP_DIRECTORIES && S_ISDIR (st.st_mode))
            || ((devices == SKIP_DEVICES
                 || (devices == READ_COMMAND_LINE_DEVICES && !command_line))
-@@ -1945,9 +2340,16 @@
+@@ -1945,9 +2347,16 @@
      }
  
   closeout:
@@ -570,7 +577,7 @@
  }
  
  static bool
-@@ -2063,6 +2465,17 @@
+@@ -2063,6 +2472,17 @@
        --colour[=WHEN]       use markers to highlight the matching strings;\n\
                              WHEN is 'always', 'never', or 'auto'\n\
    -U, --binary              do not strip CR characters at EOL (MSDOS/Windows)\n\

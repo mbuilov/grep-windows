@@ -27,16 +27,13 @@ TLINK1      = $(CFLAGS) /wd4996 /Fe$(TEST1) /link /LTCG $(SUBSYSTEM)
 TLINK2      = $(CFLAGS) /wd4996 /Fe$(TEST2) /link /LTCG $(SUBSYSTEM)
 TLINK3      = $(CFLAGS) /wd4996 /Fe$(TEST3) /link /LTCG $(SUBSYSTEM)
 
-UTIL        = testrepl.exe
-ULINK       = $(CFLAGS) /Fe$(UTIL) /link /LTCG $(SUBSYSTEM)
-
 PCRE2_TEST_RUN     = cmd /c RunTest.bat
 PCRE2GREP_TEST_RUN = cmd /c RunGrepTest.bat
 TEST_OK            = echo.All OK
 
 PCRE2GREP_LINK = $(CFLAGS) /wd4996 /Fe$(PCRE2GREP) /link /LTCG $(SUBSYSTEM)
 
-CLEAN = del /q src\*.obj $(LIBPCRE2) $(LIBPCRE2POSIX) $(PCRE2GREP) $(TEST1) $(TEST2) $(TEST3) $(UTIL) *.obj *.ilk *.pdb 2>NUL
+CLEAN = del /q src\*.obj $(LIBPCRE2) $(LIBPCRE2POSIX) $(PCRE2GREP) $(TEST1) $(TEST2) $(TEST3) *.obj *.ilk *.pdb 2>NUL
 
 all: $(LIBPCRE2) $(LIBPCRE2POSIX) $(PCRE2GREP)
 
@@ -156,10 +153,7 @@ $(TEST2): src\pcre2_jit_test.c $(LIBPCRE2POSIX) $(LIBPCRE2)
 $(TEST3): src\pcre2posix_test.c $(LIBPCRE2POSIX) $(LIBPCRE2)
 	$(CC) /DPCRE2_STATIC /Isrc src\pcre2posix_test.c $(TLINK3) $(LIBPCRE2POSIX) $(LIBPCRE2)
 
-$(UTIL): testrepl.c
-	$(CC) testrepl.c $(ULINK)
-
-check: $(TEST1) $(TEST2) $(TEST3) $(UTIL) $(PCRE2GREP)
+check: $(TEST1) $(TEST2) $(TEST3) $(PCRE2GREP)
 	$(PCRE2_TEST_RUN)
 	$(PCRE2GREP_TEST_RUN)
 	$(TEST_OK)

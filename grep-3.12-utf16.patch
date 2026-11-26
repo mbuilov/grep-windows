@@ -1,6 +1,6 @@
---- grep-3.11/src/grep.c	2023-11-03 15:48:03.330501300 +0300
-+++ grep-3.11/src/grep.c	2023-11-03 15:48:02.897786300 +0300
-@@ -479,6 +479,15 @@
+--- grep-3.12/src/grep.c	2025-04-08 19:32:24.000000000 +0300
++++ grep-3.12/src/grep.c	2026-11-26 12:02:57.555721400 +0300
+@@ -481,6 +481,15 @@
      stdout_errno = errno;
  }
  
@@ -16,19 +16,19 @@
  static struct exclude *excluded_patterns[2];
  static struct exclude *excluded_directory_patterns[2];
  /* Short options.  */
-@@ -551,6 +560,11 @@
-   {"text", no_argument, NULL, 'a'},
-   {"binary", no_argument, NULL, 'U'},
-   {"unix-byte-offsets", no_argument, NULL, 'u'},
+@@ -552,6 +561,11 @@
+   {"silent", no_argument, nullptr, 'q'},
+   {"text", no_argument, nullptr, 'a'},
+   {"binary", no_argument, nullptr, 'U'},
 +#if defined _WIN32 && ! defined __CYGWIN__
 +  {"utf16", no_argument, &read_utf16, READ_UTF16_AUTO},
 +  {"utf16-be", no_argument, &read_utf16, READ_UTF16_BE},
 +  {"utf16-le", no_argument, &read_utf16, READ_UTF16_LE},
 +#endif
-   {"version", no_argument, NULL, 'V'},
-   {"with-filename", no_argument, NULL, 'H'},
-   {"word-regexp", no_argument, NULL, 'w'},
-@@ -793,7 +807,7 @@
+   {"version", no_argument, nullptr, 'V'},
+   {"with-filename", no_argument, nullptr, 'H'},
+   {"word-regexp", no_argument, nullptr, 'w'},
+@@ -794,7 +808,7 @@
  file_must_have_nulls (idx_t size, int fd, struct stat const *st)
  {
    /* If the file has holes, it must contain a null byte somewhere.  */
@@ -37,7 +37,7 @@
        && usable_st_size (st) && size < st->st_size)
      {
        off_t cur = size;
-@@ -921,7 +935,7 @@
+@@ -930,7 +944,7 @@
    bufbeg = buflim = ALIGN_TO (buffer + 1, pagesize);
    bufbeg[-1] = eolbyte;
    bufdesc = fd;
@@ -46,7 +46,7 @@
    seek_failed = bufoffset < 0;
  
    /* Assume SEEK_DATA fails if SEEK_CUR does.  */
-@@ -939,6 +953,10 @@
+@@ -948,6 +962,10 @@
    return true;
  }
  
@@ -57,7 +57,7 @@
  /* Read new stuff into the buffer, saving the specified
     amount of old stuff.  When we're done, 'bufbeg' points
     to the beginning of the buffer contents, and 'buflim'
-@@ -977,7 +995,7 @@
+@@ -986,7 +1004,7 @@
               heuristic if we've already read past the file end, as most
               likely the file is growing.  */
            ptrdiff_t alloc_max = -1;
@@ -66,20 +66,20 @@
              {
                off_t to_be_read = st->st_size - bufoffset;
                ptrdiff_t a;
-@@ -1011,7 +1029,11 @@
+@@ -1017,7 +1035,11 @@
  
    while (true)
      {
--      fillsize = safe_read (bufdesc, readbuf, readsize);
+-      fillsize = safe_read (bufdesc, readbuf, good_readsize);
 +      fillsize =
 +#if defined _WIN32 && ! defined __CYGWIN__
-+        bufdesc == -333 ? utf16_to_utf8 (readbuf, readsize) :
++        bufdesc == -333 ? utf16_to_utf8 (readbuf, good_readsize) :
 +#endif
-+        safe_read (bufdesc, readbuf, readsize);
-       if (fillsize == SAFE_READ_ERROR)
++        safe_read (bufdesc, readbuf, good_readsize);
+       if (fillsize < 0)
          {
            fillsize = 0;
-@@ -1023,7 +1045,7 @@
+@@ -1029,7 +1051,7 @@
          break;
        totalnl = add_count (totalnl, fillsize);
  
@@ -88,7 +88,7 @@
          {
            /* Solaris SEEK_DATA fails with errno == ENXIO in a hole at EOF.  */
            off_t data_start = lseek (bufdesc, bufoffset, SEEK_DATA);
-@@ -1542,7 +1564,7 @@
+@@ -1550,7 +1572,7 @@
    if (align_tabs)
      {
        /* Width is log of maximum number.  Line numbers are origin-1.  */
@@ -97,7 +97,7 @@
        num += out_line && num < INTMAX_MAX;
        do
          offset_width++;
-@@ -1748,20 +1770,393 @@
+@@ -1753,20 +1775,393 @@
    return false;
  }
  
@@ -424,7 +424,7 @@
 -  int desc = openat_safer (dirdesc, name, oflag);
 -  if (desc < 0)
 +  int desc;
-+ 
++
 +#if defined _WIN32 && ! defined __CYGWIN__
 +
 +  /* try to memory-map file */
@@ -501,7 +501,7 @@
      }
    return grepdesc (desc, command_line);
  }
-@@ -1801,7 +2196,7 @@
+@@ -1806,7 +2201,7 @@
  static void
  finalize_input (int fd, struct stat const *st, bool ineof)
  {
@@ -510,7 +510,7 @@
        && (outleft
            ? (!ineof
               && (seek_failed
-@@ -1828,25 +2223,25 @@
+@@ -1833,25 +2228,25 @@
       example, normally DESC is a directory only at the top level, but
       there is an exception if some other process substitutes a
       directory for a non-directory while 'grep' is running.  */
@@ -541,7 +541,7 @@
        && directories == RECURSE_DIRECTORIES && S_ISDIR (st.st_mode))
      {
        /* Traverse the directory starting with its full name, because
-@@ -1877,7 +2272,7 @@
+@@ -1882,7 +2277,7 @@
          suppressible_error (errno);
        return status;
      }
@@ -550,7 +550,7 @@
        && ((directories == SKIP_DIRECTORIES && S_ISDIR (st.st_mode))
            || ((devices == SKIP_DEVICES
                 || (devices == READ_COMMAND_LINE_DEVICES && !command_line))
-@@ -1940,9 +2335,16 @@
+@@ -1945,9 +2340,16 @@
      }
  
   closeout:
@@ -570,7 +570,7 @@
  }
  
  static bool
-@@ -2058,6 +2460,17 @@
+@@ -2063,6 +2465,17 @@
        --colour[=WHEN]       use markers to highlight the matching strings;\n\
                              WHEN is 'always', 'never', or 'auto'\n\
    -U, --binary              do not strip CR characters at EOL (MSDOS/Windows)\n\
@@ -587,4 +587,4 @@
 +      printf (_("\
  \n"));
        printf (_("\
- When FILE is '-', read standard input.  With no FILE, read '.' if\n\
+ When FILE is '-', read standard input.  If no FILE is given, read standard\n\

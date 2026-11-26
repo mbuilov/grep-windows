@@ -19,23 +19,23 @@ Author of the patches: Michael M. Builov (mbuilov@yandex.ru)
 - added support for wildcard expansion of grep arguments
 
 ## Pre-built executables:
-- [`grep-3.11-x64.exe`](/grep-3.11-x64.exe) - grep 3.11 built for Windows10 x64
-- [`grep-3.11-x86.exe`](/grep-3.11-x86.exe) - grep 3.11 built for WindowsXP x86
-- [`pcre2grep-10.47-x64.exe`](/pcre2grep-10.47-x64.exe) - pcre2grep 10.47 built for Windows10 x64
-- [`pcre2grep-10.47-x86.exe`](/pcre2grep-10.47-x86.exe) - pcre2grep 10.47 built for WindowsXP x86
+- [`grep-3.12-x64.exe`](/grep-3.12-x64.exe) - grep 3.12 built for Windows7 x64
+- [`grep-3.12-x86.exe`](/grep-3.12-x86.exe) - grep 3.12 built for WindowsXP x86
+- [`pcre2grep-10.49-x64.exe`](/pcre2grep-10.49-x64.exe) - pcre2grep 10.49 built for Windows7 x64
+- [`pcre2grep-10.49-x86.exe`](/pcre2grep-10.49-x86.exe) - pcre2grep 10.49 built for WindowsXP x86
 
 ## Instructions how to build pcre2grep
-- [`pcre2-10.47-build.txt`](/pcre2/pcre2-10.47-build.txt)
+- [`pcre2-10.49-build.txt`](/pcre2/pcre2-10.49-build.txt)
 
 ## Instructions how to create build patch
-- [`grep-3.11-build-patch-howto.txt`](/grep-3.11-build-patch-howto.txt)
+- [`grep-3.12-build-patch-howto.txt`](/grep-3.12-build-patch-howto.txt)
 
 ## Instructions how to apply build patch to compile Gnu grep using native tools only
-- [`grep-3.11-build.txt`](/grep-3.11-build.txt)
+- [`grep-3.12-build.txt`](/grep-3.12-build.txt)
 
 ## Prepared build patches
 For x64/Windows10/VS22:
-- [`grep-3.11-build-VS22-x64.patch`](/grep-3.11-build-VS22-x64.patch)
+- [`grep-3.12-build-VS22-x64.patch`](/grep-3.12-build-VS22-x64.patch)
 
 For x86/WindowsXP/VS22:
-- [`grep-3.11-build-VS22-x86.patch`](/grep-3.11-build-VS22-x86.patch)
+- [`grep-3.12-build-VS22-x86.patch`](/grep-3.12-build-VS22-x86.patch)
